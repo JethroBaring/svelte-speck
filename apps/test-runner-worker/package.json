@@ -1,0 +1,26 @@
+{
+  "name": "test-runner-worker",
+  "version": "1.0.0",
+  "description": "Playwright test runner microservice",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "start:execution": "node workers/execution.worker.js",
+    "start:database": "node workers/database.worker.js",
+    "dev:execution": "nodemon workers/execution.worker.js",
+    "dev:database": "nodemon workers/database.worker.js"
+  },
+  "dependencies": {
+    "bullmq": "^5.58.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.7.0",
+    "minio": "^8.0.5",
+    "playwright": "^1.40.0",
+    "redis": "^5.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

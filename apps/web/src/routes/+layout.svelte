@@ -1,16 +1,18 @@
 <script lang="ts">
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
-	import { setSidebarState } from '../stores/sidebar-state.svelte';
-	
+	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { setSidebarState } from '@/lib/stores/sidebar-store.svelte';
+
 	let { children } = $props();
-	
-	// Initialize sidebar state context
+	const queryClient = new QueryClient();
+
 	setSidebarState();
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={'/images/speck-logo.png'} />
 </svelte:head>
 
-{@render children?.()}
+<QueryClientProvider client={queryClient}>
+	{@render children?.()}
+</QueryClientProvider>

@@ -1,4 +1,4 @@
 <script lang="ts">
-	import Signin from "@/components/auth/sign-in.svelte";
+	import Signin from "@/lib/components/auth/sign-in.svelte";
 </script>
 <Signin />

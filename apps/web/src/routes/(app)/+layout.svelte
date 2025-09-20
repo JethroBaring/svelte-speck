@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import Sidebar from '@/components/common/app-sidebar.svelte';
-	import { getSidebarState } from '@/stores/sidebar-state.svelte';
-	import AppHeader from '@/components/common/app-header.svelte';
+	import Sidebar from '@/lib/components/common/app-sidebar.svelte';
+	import { getSidebarState } from '@/lib/stores/sidebar-store.svelte';
+	import AppHeader from '@/lib/components/common/app-header.svelte';
 
 	interface LayoutProps {
 		children: Snippet;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import GridShape from '../../components/common/grid-shape.svelte';
+	import GridShape from '@/lib/components/common/grid-shape.svelte';
 
 	interface LayoutProps {
 		children: Snippet;
