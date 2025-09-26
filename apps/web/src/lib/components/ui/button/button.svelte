@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		size?: 'sm' | 'md';
+		size?: 'xs' | 'sm' | 'md';
 		variant?: 'primary' | 'outline';
 		startIcon?: any;
 		endIcon?: any;
@@ -22,6 +22,7 @@
 	}: Props = $props();
 
 	const sizeClasses = {
+    xs: "px-3 py-2.5 text-sm",
 		sm: 'px-4 py-3 text-sm',
 		md: 'px-5 py-3.5 text-sm'
 	};

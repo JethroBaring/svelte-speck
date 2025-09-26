@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Sidebar from '@/lib/components/common/app-sidebar.svelte';
-	import { getSidebarState } from '@/lib/stores/sidebar-store.svelte';
+	import { getSidebarStore } from '@/lib/stores/ui/sidebar-store.svelte';
 	import AppHeader from '@/lib/components/common/app-header.svelte';
 
 	interface LayoutProps {
@@ -9,7 +9,7 @@
 	}
 
 	const { children }: LayoutProps = $props();
-	const sidebar = getSidebarState();
+	const sidebar = getSidebarStore();
 
 	const mainContentMargin = $derived(
 		sidebar.isMobileOpen
@@ -22,7 +22,7 @@
 
 <div class="min-h-screen xl:flex dark:bg-gray-900">
 	<Sidebar />
-	<div class={`flex flex-1 flex-col transition-all  duration-300 ease-in-out ${mainContentMargin}`}>
+	<div class={`flex flex-col transition-all  duration-300 ease-in-out ${mainContentMargin} flex-1`}>
 		<AppHeader />
 		<div class="flex-1">{@render children?.()}</div>
 	</div>

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Prisma } from '../../../../apps/packages/types/generated/prisma';
+import type { Prisma } from '../../generated/prisma';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS

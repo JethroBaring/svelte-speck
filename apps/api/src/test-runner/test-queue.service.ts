@@ -7,7 +7,7 @@ import {
   TestSuiteRunStatus,
   TestCaseRunStatus,
   TestStepStatus,
-} from 'generated/prisma';
+} from '@repo/types/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface TestSuiteQueueData {

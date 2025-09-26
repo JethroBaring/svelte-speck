@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus } from '@lucide/svelte';
+	import { Plus } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
 
 	export interface Tab {
@@ -56,11 +56,10 @@
 				type="button"
 				bind:this={tabRefs[index]}
 				onclick={() => onTabChange(tab.value)}
-				class={`inline-flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-all duration-300 ease-out ${
-					activeTab === tab.value
-						? 'border-transparent text-brand-500 dark:text-brand-400'
-						: 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-				}`}
+				class="inline-flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-all duration-300 ease-out {activeTab ===
+				tab.value
+					? 'border-transparent text-brand-500 dark:text-brand-400'
+					: 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}"
 			>
 				{@render tab.icon?.()}
 				{tab.label}
@@ -81,14 +80,14 @@
 
 		<div
 			class="absolute inset-0 bg-brand-50 transition-all duration-300 ease-out dark:bg-brand-500/[0.12]"
-			style:left={`${indicatorStyle.left}px`}
-			style:width={`${indicatorStyle.width}px`}
+			style:left="{indicatorStyle.left}px"
+			style:width="{indicatorStyle.width}px"
 		></div>
 
 		<div
 			class="absolute bottom-0 h-0.5 bg-brand-500 transition-all duration-300 ease-out dark:bg-brand-400"
-			style:left={`${indicatorStyle.left}px`}
-			style:width={`${indicatorStyle.width}px`}
+			style:left="{indicatorStyle.left}px"
+			style:width="{indicatorStyle.width}px"
 		></div>
 	</nav>
 </div>

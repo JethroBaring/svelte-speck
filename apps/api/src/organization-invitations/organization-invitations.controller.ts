@@ -1,7 +1,5 @@
 import { Controller, Post, Param } from '@nestjs/common';
 import { OrganizationInvitationsService } from './organization-invitations.service';
-import { Session } from "@mguay/nestjs-better-auth";
-import type { UserSession } from "@mguay/nestjs-better-auth";
 
 @Controller('organizations/invitations')
 export class OrganizationInvitationsController {
@@ -15,6 +13,4 @@ export class OrganizationInvitationsController {
   ) {
     return this.organizationInvitationsService.verifyInvitation(token);
   }
-
-  
 }

@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 
-export class SidebarState {
+export class SidebarStore {
 	isExpanded: boolean = $state(true);
   isMobileOpen: boolean = $state(false);
   isMobile: boolean = $state(false);
@@ -54,10 +54,10 @@ export class SidebarState {
 
 const SIDEBAR_KEY = Symbol('SIDEBAR');
 
-export function setSidebarState() {
-	return setContext(SIDEBAR_KEY, new SidebarState());
+export function setSidebarStore() {
+	return setContext(SIDEBAR_KEY, new SidebarStore());
 }
 
-export function getSidebarState() {
-	return getContext<ReturnType<typeof setSidebarState>>(SIDEBAR_KEY);
+export function getSidebarStore() {
+	return getContext<ReturnType<typeof setSidebarStore>>(SIDEBAR_KEY);
 }

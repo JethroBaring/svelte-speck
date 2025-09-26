@@ -1,7 +1,7 @@
 // src/test-runner/enhanced-test-queue.controller.ts
 import { Public } from '@mguay/nestjs-better-auth';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { TestCaseRunStatus } from 'generated/prisma';
+import { TestCaseRunStatus } from '@repo/types/prisma';
 import { TestQueueService } from './test-queue.service';
 
 @Controller('test-runner')

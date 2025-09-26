@@ -4,5 +4,6 @@ import GridShape from './grid-shape.svelte';
 import AppHeader from './app-header.svelte';
 import AppSidebar from './app-sidebar.svelte';
 import RightSidebarTab from './right-sidebar-tab.svelte';
+import TestStatusIcon from './test-status-icon.svelte';
 
-export { NotificationDropdown, UserDropdown, GridShape, AppHeader, AppSidebar, RightSidebarTab };
+export { NotificationDropdown, UserDropdown, GridShape, AppHeader, AppSidebar, RightSidebarTab, TestStatusIcon };

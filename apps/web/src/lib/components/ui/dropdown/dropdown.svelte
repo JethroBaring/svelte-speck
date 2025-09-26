@@ -11,13 +11,13 @@
 
 	let dropdownRef = $state<HTMLDivElement | null>(null);
 	$effect(() => {
+		// Only attach listener when dropdown is open
+		if (!isOpen) return;
+
 		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				dropdownRef &&
-				dropdownRef.contains(event.target as Node) &&
-				!dropdownRef.contains(event.target as Node) &&
-				!(event.target as HTMLElement).closest('.dropdown-toggle')
-			) {
+			const target = event.target as Node;
+			const clickedToggle = (event.target as HTMLElement).closest('.dropdown-toggle');
+			if (dropdownRef && !dropdownRef.contains(target) && !clickedToggle) {
 				onClose();
 			}
 		};

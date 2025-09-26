@@ -8,6 +8,7 @@
 	import { EyeIcon } from 'lucide-svelte';
 	import { EyeClosedIcon } from 'lucide-svelte';
 	import { signIn } from '$lib/auth-client';
+	import { goto } from '$app/navigation';
 
 	let email = $state('');
 	let password = $state('');
@@ -16,27 +17,28 @@
 	let isChecked = $state(false);
 	let isLoading = $state(false);
 
-	const handleSignin = async (e: Event) => {
-		e.preventDefault();
+	const handleSignin = async () => {
 		isLoading = true;
-		await signIn.email(
-			{
-				email: email,
-				password: password,
-				callbackURL: '/'
-			},
-			{
-				onError(context) {
-					alert(context.error.message);
+		try {
+			await signIn.email(
+				{
+					email: email,
+					password: password,
+				},
+				{
+					onSuccess: async () => {
+						goto('/projects');
+					},
+					onError(context) {
+						alert(context.error.message);
+					}
 				}
-			}
-		);
+			);
+		} catch (error) {
+			// alert(error.message);
+		}
 		isLoading = false;
 	};
-
-	$effect(() => {
-		console.log(email, password);
-	})
 </script>
 
 <div class="flex w-full flex-1 flex-col lg:w-1/2">
@@ -53,7 +55,7 @@
 		<div>
 			<div class="mb-5 sm:mb-8">
 				<h1
-					class="mb-2 text-title-sm font-semibold text-gray-800 sm:text-title-md dark:text-white/90"
+					class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90"
 				>
 					Sign In
 				</h1>
@@ -62,17 +64,13 @@
 				</p>
 			</div>
 			<div>
-				<form onsubmit={handleSignin}>
+				<form>
 					<div class="space-y-6">
 						<div>
 							<Label>
 								Email <span class="text-error-500">*</span>{' '}
 							</Label>
-							<Input
-								placeholder="johndoe@gmail.com"
-								type="email"
-								bind:value={email}
-							/>
+							<Input placeholder="johndoe@gmail.com" type="email" bind:value={email} />
 						</div>
 						<div>
 							<Label>
@@ -89,7 +87,7 @@
 								<!-- svelte-ignore a11y_no_static_element_interactions -->
 								<span
 									onclick={() => (showPassword = !showPassword)}
-									class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer"
+									class="absolute right-4 top-1/2 z-30 -translate-y-1/2 cursor-pointer"
 								>
 									{#if showPassword}
 										<EyeIcon class="fill-gray-500 dark:fill-gray-400" />
@@ -102,19 +100,19 @@
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<Checkbox checked={isChecked} onChange={() => (isChecked = !isChecked)} />
-								<span class="block text-theme-sm font-normal text-gray-700 dark:text-gray-400">
+								<span class="text-theme-sm block font-normal text-gray-700 dark:text-gray-400">
 									Keep me logged in
 								</span>
 							</div>
 							<a
 								href="/reset-password"
-								class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
+								class="text-brand-500 hover:text-brand-600 dark:text-brand-400 text-sm"
 							>
 								Forgot password?
 							</a>
 						</div>
 						<div>
-							<Button className="w-full" size="sm" disabled={isLoading}>
+							<Button className="w-full" size="xs" disabled={isLoading} onClick={handleSignin}>
 								{#if isLoading}
 									<div class="flex items-center justify-center gap-2">
 										<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />

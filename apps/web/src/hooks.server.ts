@@ -1,24 +1,28 @@
 import { redirect } from '@sveltejs/kit';
 import type { Handle } from '@sveltejs/kit';
+import { auth } from './lib/auth-client';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const { url, cookies } = event;
-  const pathname = url.pathname;
+	// Ask NestJS Better Auth server for the session
+	const session = await auth.getSession({
+		fetchOptions: {
+			headers: event.request.headers // forwards cookies
+		}
+	});
 
-  // Protected routes - equivalent to Next.js matcher
-  const protectedRoutes = ['/dashboard', '/profile'];
+	if (session) {
+		event.locals.session = session.data?.session;
+		event.locals.user = session.data?.user;
+	}
 
-  // Check if current route is protected
-  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-    // Just check if session cookie exists (no server validation)
-    const sessionCookie = cookies.get('better-auth.session_token');
-    
-    if (!sessionCookie) {
-      // Redirect to home/login if no session cookie
-      throw redirect(302, '/login');
-    }
-  }
+	// Protect routes
+	const protectedRoutes = ['/dashboard', '/profile'];
+	if (
+		protectedRoutes.some((route) => event.url.pathname.startsWith(route)) &&
+		!event.locals.session
+	) {
+		throw redirect(302, '/signin');
+	}
 
-  // Continue with the request
-  return await resolve(event);
+	return resolve(event);
 };

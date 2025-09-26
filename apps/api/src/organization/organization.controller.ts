@@ -29,8 +29,9 @@ export class OrganizationController {
   }
 
   @Get()
-  findOne(@Session() session: UserSession) {
-    return this.organizationService.findOne(session.user.id);
+  findAll(@Session() session: UserSession) {
+    console.log(session.user.id)
+    return this.organizationService.findAll(session.user.id);
   }
 
   @Patch(':id')
@@ -58,9 +59,9 @@ export class OrganizationController {
     return this.projectsService.create(id, session.user.id, createProjectDto);
   }
 
-  @Get('user-belongs-to-organization')
-  userBelongsToOrganization(@Session() session: UserSession) {
-    return this.organizationService.userBelongsToOrganization(session.user.id);
+  @Get(':id/projects')
+  findProjects(@Param('id') id: string, @Session() session: UserSession) {
+    return this.projectsService.findAll(id, session.user.id);
   }
 
   @Get(':id/members')

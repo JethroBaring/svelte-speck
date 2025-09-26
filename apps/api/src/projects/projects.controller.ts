@@ -42,11 +42,6 @@ export class ProjectsController {
     private readonly pagesService: PagesService,
   ) {}
 
-  @Get()
-  findAll(@Session() session: UserSession) {
-    return this.projectsService.findAll(session.user.id);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(id);

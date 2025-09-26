@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Calendar, CalendarIcon, ChevronDown, DotIcon, ListIcon, TableIcon } from 'lucide-svelte';
-	import { getSidebarState } from '@/lib/stores/sidebar-store.svelte';
-
+	import { getSidebarStore } from '@/lib/stores/ui/sidebar-store.svelte';
+	import { useProjects } from '@/lib/queries/use-projects';
+	import ProjectDropdown from "../projects/dropdown/organization-dropdown.svelte";
+	import { setOrganizationStore, getOrganizationStore } from '@/lib/stores/ui/organization-store.svelte';
+	import { createQuery } from "@tanstack/svelte-query";
+	import { getProjects } from "@/lib/api/projects";
+	
 	type NavItem = {
 		name: string;
 		icon: any; // Lucide icon component
@@ -58,7 +63,18 @@
 		}
 	];
 
-	const sidebar = getSidebarState();
+	const organizationStore = getOrganizationStore();
+	const selectedOrganization = $derived(organizationStore.organization);
+
+	const sidebar = getSidebarStore();
+	const projectsQuery = createQuery(() => ({
+    queryKey: ['projects'],
+    queryFn: () => getProjects('dc574f66-69f1-4a9f-a691-0cefebeefe02'),
+    enabled: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  }));
 	let openSubmenu = $state<{ type: string; index: number } | null>(null);
 	let subMenuHeight = $state<Record<string, number>>({});
 	let subMenuRefs = $state<Record<string, HTMLDivElement>>({});
@@ -106,6 +122,14 @@
 			openSubmenu = { type: menuType, index };
 		}
 	};
+
+	const projects = $derived(
+		(projectsQuery?.data as any)?.data?.map((project: any) => ({
+			icon: Calendar,
+			name: project.name,
+			path: `/projects/${project.id}`
+		}))
+	);
 </script>
 
 <aside
@@ -141,8 +165,9 @@
 		</a>
 	</div>
 	<div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-		<nav class="mb-6">
-			<div class="flex flex-col gap-4">
+		<nav class="mb-6 space-y-6">
+			<ProjectDropdown />
+			<div class="flex flex-col gap-6">
 				<div>
 					<h2
 						class={`mb-4 flex text-xs leading-[20px] text-gray-400 uppercase ${
@@ -155,22 +180,32 @@
 							<DotIcon />
 						{/if}
 					</h2>
-					{@render renderMenuItems(navItems, 'main')}
-				</div>
 
-				<div class="">
+					{@render renderMenuItems(
+						[
+							{ icon: Calendar, name: 'Settings', path: '/' },
+							{ icon: Calendar, name: 'Integrations', path: '/' },
+							{ icon: Calendar, name: 'Schedules', path: '/' }
+						],
+						'main'
+					)}
+				</div>
+				<div>
 					<h2
 						class={`mb-4 flex text-xs leading-[20px] text-gray-400 uppercase ${
 							!sidebar.isExpanded && !sidebar.isHovered ? 'lg:justify-center' : 'justify-start'
 						}`}
 					>
 						{#if sidebar.isExpanded || sidebar.isHovered || sidebar.isMobileOpen}
-							Others
+							Projects
 						{:else}
 							<DotIcon />
 						{/if}
 					</h2>
-					{@render renderMenuItems(othersItems, 'others')}
+
+					{#if (projects?.length ?? 0) > 0}
+						{@render renderMenuItems(projects || [], 'main')}
+					{/if}
 				</div>
 			</div>
 		</nav>

@@ -60,7 +60,7 @@
 		{max}
 		{step}
 		{disabled}
-		class={inputClasses}
+		class="{inputClasses} {className}"
 		{required}
 	/>
 	{#if hint}

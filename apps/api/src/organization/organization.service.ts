@@ -184,8 +184,8 @@ export class OrganizationService {
     return organization;
   }
 
-  async findOne(userId: string) {
-    const x = await this.prisma.organization.findFirst({
+  async findAll(userId: string) {
+    const x = await this.prisma.organization.findMany({
       where: {
         members: {
           some: {
@@ -194,7 +194,6 @@ export class OrganizationService {
         },
       },
     });
-    console.log(x);
     return x;
   }
 

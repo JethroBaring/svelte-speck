@@ -210,7 +210,7 @@
 							</p>
 						</div>
 						<div>
-							<Button className="w-full" size="sm" disabled={isLoading || !agreeToTerms}>
+							<Button className="w-full" size="xs" disabled={isLoading || !agreeToTerms}>
 								Sign Up
 							</Button>
 						</div>

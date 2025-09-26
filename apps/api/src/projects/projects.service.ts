@@ -37,15 +37,17 @@ export class ProjectsService {
     return project
   }
 
-  async findAll(userId: string) {
+  async findAll(organizationId: string, userId: string) {
     const organizationMember = await this.prisma.organizationMember.findUnique({
       where: {
         organizationId_userId: {
-          organizationId: userId,
+          organizationId,
           userId,
         },
       },
     })
+
+    console.log("organizationMember", organizationMember);
 
     return await this.prisma.project.findMany({
       where: {

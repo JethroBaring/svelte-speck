@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@repo/types/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from 'src/common/crypto/crypto.service';
 import { MailService } from 'src/mail/mail.service';
