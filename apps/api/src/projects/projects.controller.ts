@@ -1,34 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation-pipe';
-import { ProjectMembersService } from 'src/project-members/project-members.service';
-import { TestSuitesService } from 'src/test-suites/test-suites.service';
-import { TestCasesService } from 'src/test-cases/test-cases.service';
-import { ProjectVariablesService } from 'src/project-variables/project-variables.service';
-import { ProjectFunctionsService } from 'src/project-functions/project-functions.service';
-import { PagesService } from 'src/pages/pages.service';
-import { Session } from '@mguay/nestjs-better-auth';
 import type { UserSession } from '@mguay/nestjs-better-auth';
+import { Session } from '@mguay/nestjs-better-auth';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post
+} from '@nestjs/common';
 import {
   PageCreateSchema,
-  ProjectCreateSchema,
   ProjectFunctionCreateSchema,
   ProjectFunctionUpdateSchema,
   ProjectMemberUpdateSchema,
   ProjectUpdateSchema,
   ProjectVariableCreateSchema,
   ProjectVariableUpdateSchema,
-  TestSuiteCreateSchema,
+  TestSuiteCreateSchema
 } from '@repo/types/schemas';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation-pipe';
+import { PagesService } from 'src/pages/pages.service';
+import { ProjectFunctionsService } from 'src/project-functions/project-functions.service';
+import { ProjectMembersService } from 'src/project-members/project-members.service';
+import { ProjectVariablesService } from 'src/project-variables/project-variables.service';
+import { TestCasesService } from 'src/test-cases/test-cases.service';
+import { TestSuitesService } from 'src/test-suites/test-suites.service';
+import { ProjectsService } from './projects.service';
 
 @Controller('projects')
 export class ProjectsController {

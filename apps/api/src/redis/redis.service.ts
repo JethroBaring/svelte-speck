@@ -133,7 +133,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     switch (event.type) {
       case 'test-suite-started':
-        console.log('HANNAH testsuitestarted', progressData.testSuiteRunId);
         this.webSocketGateway.emitTestSuiteStarted(progressData);
         break;
       case 'test-suite-completed':
@@ -154,7 +153,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       testCase: event.data.testCase,
       timestamp: event.timestamp,
     };
-
     switch (event.type) {
       case 'test-case-started':
         this.webSocketGateway.emitTestCaseStarted(progressData);
@@ -174,9 +172,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         stepNumber: event.data.stepNumber,
         status: event.data.status,
         error: event.data.error,
+        screenshotUrl: event.data.screenshotUrl,
       },
       timestamp: event.timestamp,
     };
+
+    console.log("HANNAH I LOVE YOU 2", progressData);
 
     switch (event.type) {
       case 'test-step-started':

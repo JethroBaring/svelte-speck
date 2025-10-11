@@ -52,6 +52,11 @@ export class TestSuitesController {
     return this.testSuitesService.remove(id);
   }
 
+  @Get(':id/latest-run')
+  findCurrentRun(@Param('id') id: string) {
+    return this.testSuitesService.findLatestRun(id);
+  }
+
   @Post(':id/test-cases')
   createTestCase(
     @Param('id') id: string,

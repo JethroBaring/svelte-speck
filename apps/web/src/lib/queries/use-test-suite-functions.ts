@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getTestSuiteFunctions, createTestSuiteFunction, deleteTestSuiteFunction } from '@/lib/api/test-suite-functions';
+import { getTestSuiteFunctions, createTestSuiteFunction, deleteTestSuiteFunction } from '$lib/api/test-suite-functions';
 import type { TestSuiteFunctionCreateInput, TestSuiteVariableCreateInput } from '@repo/types/schemas';
 
 export function useTestSuiteFunctions(testSuiteId: string) {

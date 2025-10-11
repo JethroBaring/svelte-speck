@@ -10,7 +10,7 @@ export class CronService {
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async cleanUpExpiredInvitations() {
     try {
-      await this.prisma.organizationInvitation.updateMany({
+      await this.prisma.workspaceInvitation.updateMany({
         where: {
           status: 'PENDING',
           // 1 day ago

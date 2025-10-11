@@ -75,14 +75,13 @@ class WebsocketService {
 
   async updateTestCaseResult(testCaseRunId, testSuiteRunId, result) {
     const timestamp = new Date().toISOString();
-    
     // Immediate WebSocket notification for UI
     await this.redis.publish('test-case-events', JSON.stringify({
       type: 'test-case-completed',
       testSuiteRunId,
       testCaseRunId,
       data: {
-        status: result.success ? 'PASSED' : 'FAILED',
+        status: result.results.every((result) => result.status === 'PASSED') ? 'PASSED' : 'FAILED',
         duration: result.duration,
         error: result.error
       },
@@ -122,7 +121,7 @@ class WebsocketService {
     await this.redis.publish('test-step-events', JSON.stringify(event));
   }
   
-  async notifyTestStepCompleted(testCaseRunId, testSuiteRunId, stepNumber, result) {
+  async notifyTestStepCompleted(testCaseRunId, testSuiteRunId, stepNumber, result, screenshotUrl) {
     // Publish directly to Redis instead of API endpoint
     const event = {
       type: 'test-step-completed',
@@ -131,11 +130,14 @@ class WebsocketService {
       data: {
         stepNumber,
         status: result?.error ? 'FAILED' : 'PASSED',
-        error: result?.error || null
+        error: result?.error || null,
+        screenshotUrl
       },
       timestamp: new Date().toISOString(),
     };
-    
+
+    console.log("HANNAH I LOVE YOU 3", event);
+
     await this.redis.publish('test-step-events', JSON.stringify(event));
   }
 

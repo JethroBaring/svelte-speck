@@ -1,15 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma } from "@repo/types/prisma";
-import { TestSuiteRunStatus } from "@repo/types/prisma";
+import { Prisma } from '@repo/types/prisma';
+import { TestSuiteRunStatus } from '@repo/types/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TestSuitesService {
-  private readonly logger = new Logger(TestSuitesService.name)
+  private readonly logger = new Logger(TestSuitesService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userId: string, projectId: string, createTestSuiteDto: Prisma.TestSuitesUncheckedCreateInput) {
+  async create(
+    userId: string,
+    projectId: string,
+    createTestSuiteDto: Prisma.TestSuitesUncheckedCreateInput,
+  ) {
     return await this.prisma.testSuites.create({
       data: {
         ...createTestSuiteDto,
@@ -76,7 +80,7 @@ export class TestSuitesService {
         testSuiteId,
       },
     });
-    
+
     const testCaseRuns = await this.prisma.testCaseRun.createMany({
       data: testCases.map((testCase) => ({
         testCaseId: testCase.id,
@@ -84,7 +88,24 @@ export class TestSuitesService {
       })),
     });
 
-    
     return testSuiteRun;
+  }
+
+  async findLatestRun(testSuiteId: string) {
+    return await this.prisma.testSuiteRun.findFirst({
+      where: {
+        testSuiteId,
+      },
+      orderBy: {
+        startedAt: 'desc' as const,
+      },
+      include: {
+        testCaseRuns: {
+          include: {
+            stepResults: true,
+          },
+        }
+      },
+    });
   }
 }

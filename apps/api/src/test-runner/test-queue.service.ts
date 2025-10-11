@@ -1,5 +1,5 @@
 // src/test-runner/enhanced-test-queue.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bullmq';
 import { RedisService } from 'src/redis/redis.service';
@@ -26,6 +26,8 @@ export interface TestCaseQueueData {
   setupCacheKey?: string;
   retryAttempt?: number;
   code?: string;
+  projectVariablesHash?: Record<string, string>;
+  testSuiteVariablesHash?: Record<string, string>;
 }
 
 export interface SetupQueueData {
@@ -66,14 +68,12 @@ export class TestQueueService {
     private redisService: RedisService,
   ) {}
 
-  async runTestSuite(
-    testSuiteId: string,
-    options: {
-      environment: string;
-      browser: string;
-      version?: string;
-    },
-  ) {
+  async runTestSuite(testSuiteId: string) {
+    const lockKey = `test-suite:run-lock:${testSuiteId}`;
+    const acquired = await this.redisService.acquireLock(lockKey, 60 * 60); // 1 hour TTL
+    if (!acquired) {
+      throw new ConflictException('Test suite already running');
+    }
     // 1. Create test suite run
     const testSuiteRun = await this.prisma.testSuiteRun.create({
       data: {
@@ -82,14 +82,22 @@ export class TestQueueService {
       },
     });
 
+
+    const testSuite = await this.prisma.testSuites.findUnique({
+      where: { id: testSuiteId },
+      select: {
+        projectId: true,
+      }
+    });
+
     // Emit suite started event
     await this.redisService.publishTestSuiteEvent({
       type: 'test-suite-started',
       testSuiteRunId: testSuiteRun.id,
       data: {
         status: TestSuiteRunStatus.RUNNING,
-        environment: options.environment,
-        browser: options.browser,
+        environment: 'production',
+        browser: 'chrome',
       },
       timestamp: new Date().toISOString(),
     });
@@ -109,9 +117,11 @@ export class TestQueueService {
             completedAt: new Date(),
           },
         });
+        await this.redisService.releaseLock(lockKey);
         return {
           testSuiteRunId: testSuiteRun.id,
           totalTestCases: 0,
+          testCaseRuns: [],
           message: 'No test cases to execute',
         };
       }
@@ -147,12 +157,13 @@ export class TestQueueService {
       // if (testSuite?.setupSteps?.length > 0) {
       //   await this.queueWithSetup(testSuiteRun.id, testCaseRuns, options);
       // } else {
-      await this.queueDirectExecution(testSuiteRun.id, testCaseRuns, options);
+      await this.queueDirectExecution(testSuiteRun.id, testCaseRuns, testSuite?.projectId!);
       // }
 
       return {
         testSuiteRunId: testSuiteRun.id,
         totalTestCases: testCases.length,
+        testCaseRuns: testCaseRuns,
         message: 'Test suite execution started',
       };
     } catch (error) {
@@ -165,6 +176,9 @@ export class TestQueueService {
           completedAt: new Date(),
         },
       });
+
+      // Release lock on failure to start
+      await this.redisService.releaseLock(lockKey);
 
       // Emit error via Redis
       await this.redisService.publishTestSuiteEvent({
@@ -247,9 +261,28 @@ export class TestQueueService {
   private async queueDirectExecution(
     testSuiteRunId: string,
     testCaseRuns: any[],
-    options: { environment: string; browser: string; version?: string },
+    projectId: string,
   ) {
     const jobIds: string[] = [];
+
+    const projectVariables = await this.prisma.projectVariable.findMany({
+      where: {
+        projectId: projectId,
+      },
+    });
+    const testSuiteVariables = await this.prisma.testSuiteVariable.findMany({
+      where: { testSuiteId: testCaseRuns[0].testSuiteId },
+    });
+
+    let projectVariablesHash: Map<string, string> = new Map();
+    let testSuiteVariablesHash: Map<string, string> = new Map();
+
+    for (const variable of projectVariables) {
+      projectVariablesHash.set(variable.name, variable.value);
+    }
+    for (const variable of testSuiteVariables) {
+      testSuiteVariablesHash.set(variable.name, variable.value);
+    }
 
     const testCaseJobs = await Promise.all(
       testCaseRuns.map(async (testCaseRun, index) => {
@@ -261,6 +294,8 @@ export class TestQueueService {
             testSuiteRunId,
             testSuiteId: testCaseRun?.testSuiteId!,
             code: testCaseRun.testCase.code,
+            projectVariablesHash: Object.fromEntries(projectVariablesHash),
+            testSuiteVariablesHash: Object.fromEntries(testSuiteVariablesHash),
           },
           {
             priority: 50,
@@ -346,6 +381,13 @@ export class TestQueueService {
       },
       timestamp: new Date().toISOString(),
     });
+
+    // 8. Release run lock for this suite
+    if (testSuiteRun?.testSuiteId) {
+      await this.redisService.releaseLock(
+        `test-suite:run-lock:${testSuiteRun.testSuiteId}`,
+      );
+    }
 
     return testSuiteRun;
   }
@@ -561,21 +603,6 @@ export class TestQueueService {
       },
     });
 
-    // Publish test case completion event
-    await this.redisService.publishTestCaseEvent({
-      type: 'test-case-completed',
-      testCaseRunId,
-      data: {
-        status: result.status,
-        duration: result.duration,
-        errorMessage: result.errorMessage,
-        stackTrace: result.stackTrace,
-        logs: result.logs,
-      },
-      testSuiteRunId: testCaseRun?.testSuiteRunId!,
-      timestamp: new Date().toISOString(),
-    });
-
     const remaining = await this.prisma.testCaseRun.count({
       where: {
         testSuiteRunId: testCaseRun?.testSuiteRunId!,
@@ -584,9 +611,28 @@ export class TestQueueService {
     });
 
     if (remaining === 0) {
+      const passedTests = await this.prisma.testCaseRun.count({
+        where: {
+          testSuiteRunId: testCaseRun?.testSuiteRunId!,
+          status: TestCaseRunStatus.PASSED,
+        },
+      });
+
+      const failedTests = await this.prisma.testCaseRun.count({
+        where: {
+          testSuiteRunId: testCaseRun?.testSuiteRunId!,
+          status: TestCaseRunStatus.FAILED,
+        },
+      });
+
       await this.prisma.testSuiteRun.update({
         where: { id: testCaseRun?.testSuiteRunId! },
-        data: { status: TestSuiteRunStatus.COMPLETED, completedAt: new Date() },
+        data: {
+          status: TestSuiteRunStatus.COMPLETED,
+          completedAt: new Date(),
+          passedTests: passedTests,
+          failedTests: failedTests,
+        },
       });
       console.log('testCaseRun?.testSuiteRunId!', testCaseRun?.testSuiteRunId!);
       await this.redisService.publishTestSuiteEvent({
@@ -595,6 +641,17 @@ export class TestQueueService {
         data: { status: TestSuiteRunStatus.COMPLETED },
         timestamp: new Date().toISOString(),
       });
+
+      // Release the run lock for this suite
+      const suiteRun = await this.prisma.testSuiteRun.findUnique({
+        where: { id: testCaseRun?.testSuiteRunId! },
+        select: { testSuiteId: true },
+      });
+      if (suiteRun?.testSuiteId) {
+        await this.redisService.releaseLock(
+          `test-suite:run-lock:${suiteRun.testSuiteId}`,
+        );
+      }
     }
 
     return {

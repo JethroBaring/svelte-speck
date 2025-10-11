@@ -1,9 +1,9 @@
 import axiosInstance from "../axios";
-import type { ApiResponse } from "../interface"
+import type { ApiResponse } from "../api-response.interface"
 import type { Project } from "@repo/types/zod"
 
-export async function getProjects(organizationId: string): Promise<ApiResponse<Project[]>> {
-  const response = await axiosInstance.get(`/organizations/${organizationId}/projects`)
+export async function getProjects(workspaceId: string): Promise<ApiResponse<Project[]>> {
+  const response = await axiosInstance.get(`/workspaces/${workspaceId}/projects`)
 
   if(!response.data) {
     throw new Error("Failed to fetch projects")
@@ -24,7 +24,7 @@ export async function getProjectById(id: string): Promise<ApiResponse<Project>> 
 }
 
 export async function createProject(id: string, name: string): Promise<ApiResponse<Project>> {
-  const response = await axiosInstance.post(`/organizations/${id}/projects/`, { name })
+  const response = await axiosInstance.post(`/workspaces/${id}/projects/`, { name })
 
   if(!response.data) {
     throw new Error("Failed to create project")

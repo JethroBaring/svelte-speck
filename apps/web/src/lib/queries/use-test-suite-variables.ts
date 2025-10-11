@@ -1,88 +1,99 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getTestSuiteVariables, createTestSuiteVariable, deleteTestSuiteVariable } from '@/lib/api/test-suite-variables';
+import {
+	getTestSuiteVariables,
+	createTestSuiteVariable,
+	deleteTestSuiteVariable
+} from '$lib/api/test-suite-variables';
 import type { TestSuiteVariableCreateInput } from '@repo/types/schemas';
 
 export function useTestSuiteVariables(testSuiteId: string) {
-  return createQuery(() => ({
-    queryKey: ['test-suites', testSuiteId, 'variables'],
-    queryFn: () => getTestSuiteVariables(testSuiteId),
-    enabled: !!testSuiteId,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  }));
+	return createQuery(() => ({
+		queryKey: ['test-suites', testSuiteId, 'variables'],
+		queryFn: () => getTestSuiteVariables(testSuiteId),
+		enabled: !!testSuiteId,
+		refetchOnMount: false,
+		refetchOnWindowFocus: false,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000 // 10 minutes
+	}));
 }
 
 export function useCreateTestSuiteVariable(testSuiteId: string) {
-  const queryClient = useQueryClient();
-  
-  return createMutation(() => ({
-    mutationFn: (createTestSuiteVariableDto: TestSuiteVariableCreateInput) => createTestSuiteVariable(testSuiteId, createTestSuiteVariableDto),
-    onSuccess: (newTestSuiteVariable) => {
-      console.log('TestSuite variable created successfully:', newTestSuiteVariable);
-      
-      // Update the cache with the actual project data returned from the server
-      queryClient.setQueryData(['test-suites', testSuiteId, 'variables'], (old: any) => {
-        console.log('Current cache data:', old);
-        
-        if (!old) return old;
-        
-        // Handle nested data structure (projects.data)
-        if (old.data && Array.isArray(old.data)) {
-          console.log('Updating nested data structure');
-          const updated = {
-            ...old,
-            data: [...old.data, newTestSuiteVariable.data]
-          };
-          console.log('Updated cache:', updated);
-          return updated;
-        }
-        
-        console.log('No matching structure found, returning old data');
-        return old;
-      });
-      
-      // Also update the individual project cache if it exists
-      queryClient.setQueryData(['test-suites', newTestSuiteVariable.data?.id], newTestSuiteVariable.data);
-    },
-    onError: (err, newTestSuiteVariableName, context) => {
-      // If the mutation fails, we could show an error toast here
-      console.error('Failed to create test suite variable:', err);
-    },
-  }));
+	const queryClient = useQueryClient();
+
+	return createMutation(() => ({
+		mutationFn: (createTestSuiteVariableDto: TestSuiteVariableCreateInput) =>
+			createTestSuiteVariable(testSuiteId, createTestSuiteVariableDto),
+		onSuccess: (newTestSuiteVariable) => {
+			console.log('TestSuite variable created successfully:', newTestSuiteVariable);
+
+			// Update the cache with the actual project data returned from the server
+			queryClient.setQueryData(['test-suites', testSuiteId, 'variables'], (old: any) => {
+				console.log('Current cache data:', old);
+
+				if (!old) return old;
+
+				// Handle nested data structure (projects.data)
+				if (old.data && Array.isArray(old.data)) {
+					console.log('Updating nested data structure');
+					const updated = {
+						...old,
+						data: [...old.data, newTestSuiteVariable.data]
+					};
+					console.log('Updated cache:', updated);
+					return updated;
+				}
+
+				console.log('No matching structure found, returning old data');
+				return old;
+			});
+
+			// Also update the individual project cache if it exists
+			queryClient.setQueryData(
+				['test-suites', newTestSuiteVariable.data?.id],
+				newTestSuiteVariable.data
+			);
+		},
+		onError: (err, newTestSuiteVariableName, context) => {
+			// If the mutation fails, we could show an error toast here
+			console.error('Failed to create test suite variable:', err);
+		}
+	}));
 }
 
 export function useDeleteTestSuiteVariable(testSuiteId: string) {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return createMutation(() => ({
-    mutationFn: (testSuiteVariableId: string) => deleteTestSuiteVariable(testSuiteId, testSuiteVariableId),
-    onSuccess: (deletedTestSuiteVariable) => {
-      console.log('TestSuite variable deleted successfully:', deletedTestSuiteVariable);
-      
-      // Update the cache
-      queryClient.setQueryData(['test-suites', testSuiteId, 'variables'], (old: any) => {
-        console.log('Current cache data:', old);
-        
-        if (!old) return old;
-        
-        // Filter out the deleted project
-        const updated = {
-          ...old,
-          data: old.data.filter((testSuiteVariable: any) => testSuiteVariable.id !== deletedTestSuiteVariable.data?.id)
-        };
-        console.log('Updated cache:', updated);
-        return updated;
-      });
-      
-      // Also invalidate the individual project cache
-      queryClient.removeQueries({ queryKey: ['test-suites', deletedTestSuiteVariable.data?.id] });
-    },
-    onError: (err, deletedTestSuiteId, context) => {
-      // If the mutation fails, we could show an error toast here
-      console.error('Failed to delete test suite variable:', err);
-    },
-  }));
+	return createMutation(() => ({
+		mutationFn: (testSuiteVariableId: string) =>
+			deleteTestSuiteVariable(testSuiteId, testSuiteVariableId),
+		onSuccess: (deletedTestSuiteVariable) => {
+			console.log('TestSuite variable deleted successfully:', deletedTestSuiteVariable);
+
+			// Update the cache
+			queryClient.setQueryData(['test-suites', testSuiteId, 'variables'], (old: any) => {
+				console.log('Current cache data:', old);
+
+				if (!old) return old;
+
+				// Filter out the deleted project
+				const updated = {
+					...old,
+					data: old.data.filter(
+						(testSuiteVariable: any) => testSuiteVariable.id !== deletedTestSuiteVariable.data?.id
+					)
+				};
+				console.log('Updated cache:', updated);
+				return updated;
+			});
+
+			// Also invalidate the individual project cache
+			queryClient.removeQueries({ queryKey: ['test-suites', deletedTestSuiteVariable.data?.id] });
+		},
+		onError: (err, deletedTestSuiteId, context) => {
+			// If the mutation fails, we could show an error toast here
+			console.error('Failed to delete test suite variable:', err);
+		}
+	}));
 }

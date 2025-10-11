@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getRoleById, createRole, getRoles } from '@/lib/api/roles';
+import { getRoleById, createRole, getRoles } from '$lib/api/roles';
 import type { RoleCreateInput } from "@repo/types";
 
 export function useCreateRole(id: string) {

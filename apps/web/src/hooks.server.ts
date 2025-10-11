@@ -16,7 +16,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// Protect routes
-	const protectedRoutes = ['/dashboard', '/profile'];
+	const protectedRoutes = ['/workspace'];
 	if (
 		protectedRoutes.some((route) => event.url.pathname.startsWith(route)) &&
 		!event.locals.session

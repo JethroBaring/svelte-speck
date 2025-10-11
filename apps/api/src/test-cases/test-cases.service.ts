@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@repo/types/prisma';
-import { MinioService } from "src/common/minio/minio.service";
+import { MinioService } from 'src/common/minio/minio.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TestCasesService {
-  constructor(private readonly prisma: PrismaService, private readonly minioService: MinioService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly minioService: MinioService,
+  ) {}
 
   async create(
     testSuiteId: string,
     createTestCaseDto: Prisma.TestCaseCreateInput,
   ) {
-    const x=  await this.prisma.testCase.create({
+    const x = await this.prisma.testCase.create({
       data: {
         ...createTestCaseDto,
         testSuite: {
@@ -33,6 +36,9 @@ export class TestCasesService {
           projectId,
         },
       },
+      orderBy: {
+        createdAt: 'asc',
+      }
     });
   }
 
@@ -43,24 +49,9 @@ export class TestCasesService {
           id: testSuiteId,
         },
       },
-      include: {
-        testCaseRuns: {
-          orderBy: { startedAt: 'desc' },
-          take: 1,
-          include: {
-            stepResults: true,
-          },
-        }
+      orderBy: {
+        createdAt: 'asc',
       }
-    });
-
-    testCases.forEach(testCase => {
-      testCase.testCaseRuns = testCase.testCaseRuns.sort((a, b) => a.id.localeCompare(b.id));
-      testCase.testCaseRuns.forEach(testCaseRun => {
-        testCaseRun.stepResults.forEach(async stepResult => {
-          stepResult.screenshot = await this.minioService.getSignedAccessUrl("test-step-screenshots", stepResult.screenshot!.split("/").pop()!, 3600);
-        });
-      });
     });
 
     return testCases;

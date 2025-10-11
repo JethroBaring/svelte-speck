@@ -1,12 +1,12 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getProjects, getProjectById, createProject, deleteProject } from '@/lib/api/projects';
+import { getProjects, getProjectById, createProject, deleteProject } from '$lib/api/projects';
 
-export function useProjects(organizationId?: string) {
+export function useProjects(workspaceId?: string) {
   return createQuery(() => ({
-    queryKey: ['projects'],
-    queryFn: () => getProjects(organizationId as string),
-    enabled: !!organizationId,
+    queryKey: ['projects', workspaceId],
+    queryFn: () => getProjects(workspaceId as string),
+    enabled: !!workspaceId,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
@@ -25,16 +25,16 @@ export function useProject(id: string) {
   }));
 }
 
-export function useCreateProject(id: string) {
+export function useCreateProject(workspaceId: string) {
   const queryClient = useQueryClient();
   
   return createMutation(() => ({
-    mutationFn: (name: string) => createProject(id, name),
+    mutationFn: (name: string) => createProject(workspaceId, name),
     onSuccess: (newProject) => {
       console.log('Project created successfully:', newProject);
       
       // Update the cache with the actual project data returned from the server
-      queryClient.setQueryData(['projects'], (old: any) => {
+      queryClient.setQueryData(['projects', workspaceId], (old: any) => {
         console.log('Current cache data:', old);
         
         if (!old) return old;
@@ -64,7 +64,7 @@ export function useCreateProject(id: string) {
   }));
 }
 
-export function useDeleteProject() {
+export function useDeleteProject(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return createMutation(() => ({
@@ -73,7 +73,7 @@ export function useDeleteProject() {
       console.log('Project deleted successfully:', deletedProject);
       
       // Update the cache
-      queryClient.setQueryData(['projects'], (old: any) => {
+      queryClient.setQueryData(['projects', workspaceId], (old: any) => {
         console.log('Current cache data:', old);
         
         if (!old) return old;

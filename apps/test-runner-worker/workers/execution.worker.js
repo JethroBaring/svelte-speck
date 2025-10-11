@@ -15,6 +15,11 @@ const worker = new Worker('test-execution-queue', async (job) => {
     console.log(`Executing test case: ${testCaseRunId}`);
     console.log(`Job data:`, job.data);
 
+    // Convert plain objects back to Maps for the execution service
+    const projectVariablesMap = new Map(Object.entries(job.data.projectVariablesHash || {}));
+    const testSuiteVariablesMap = new Map(Object.entries(job.data.testSuiteVariablesHash || {}));
+    
+    executionService.setVariables(projectVariablesMap, testSuiteVariablesMap);
     const result = await executionService.executeTestCase(job.data);
 
     console.log(`Test case result:`, result);

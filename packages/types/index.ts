@@ -25,16 +25,16 @@ import {
   TestStepResultUncheckedUpdateInputSchema,
   NotificationUncheckedCreateInputSchema,
   NotificationUncheckedUpdateInputSchema,
-  OrganizationUncheckedCreateInputSchema,
-  OrganizationUncheckedUpdateInputSchema,
-  RoleUncheckedCreateInputSchema,
-  RoleUncheckedUpdateInputSchema,
-  OrganizationMemberUncheckedCreateInputSchema,
-  OrganizationMemberUncheckedUpdateInputSchema,
+  WorkspaceUncheckedCreateInputSchema,
+  WorkspaceUncheckedUpdateInputSchema,
+  WorkspaceMemberUncheckedCreateInputSchema,
+  WorkspaceMemberUncheckedUpdateInputSchema,
   ProjectMemberUncheckedCreateInputSchema,
   ProjectMemberUncheckedUpdateInputSchema,
-  OrganizationInvitationUncheckedUpdateInputSchema,
-  OrganizationInvitationUncheckedCreateInputSchema,
+  WorkspaceInvitationUncheckedUpdateInputSchema,
+  WorkspaceInvitationUncheckedCreateInputSchema,
+  TestCaseCommentUncheckedCreateInputSchema,
+  TestCaseCommentUncheckedUpdateInputSchema,
 } from "./generated/zod";
 import z from "zod";
 
@@ -56,12 +56,12 @@ const ProjectBaseCreateSchema = ProjectUncheckedCreateInputSchema as unknown as 
 const ProjectBaseUpdateSchema = ProjectUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
 
 export const ProjectCreateSchema = ProjectBaseCreateSchema.omit({
-  organizationId: true,
+  workspaceId: true,
 });
 
 export const ProjectUpdateSchema = ProjectBaseUpdateSchema.omit({
   id: true,
-  organizationId: true,
+  workspaceId: true,
 });
 
 // PROJECT MEMBER SCHEMAS
@@ -114,6 +114,19 @@ export const TestCaseCreateSchema = TestCaseBaseCreateSchema.omit({
 export const TestCaseUpdateSchema = TestCaseBaseUpdateSchema.omit({
   id: true,
   testSuiteId: true,
+});
+
+// TEST CASE COMMENT SCHEMAS
+const TestCaseCommentBaseCreateSchema = TestCaseCommentUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
+const TestCaseCommentBaseUpdateSchema = TestCaseCommentUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
+
+export const TestCaseCommentCreateSchema = TestCaseCommentBaseCreateSchema.omit({
+  testCaseId: true,
+});
+
+export const TestCaseCommentUpdateSchema = TestCaseCommentBaseUpdateSchema.omit({
+  id: true,
+  testCaseId: true,
 });
 
 // PROJECT VARIABLE SCHEMAS
@@ -169,44 +182,30 @@ export const TestSuiteFunctionUpdateSchema = TestSuiteFunctionBaseUpdateSchema.o
 });
 
 // ORGANIZATION SCHEMAS
-const OrganizationBaseCreateSchema = OrganizationUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
-const OrganizationBaseUpdateSchema = OrganizationUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceBaseCreateSchema = WorkspaceUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceBaseUpdateSchema = WorkspaceUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
 
-export const OrganizationCreateSchema = OrganizationBaseCreateSchema.omit({
-  // Organizations don't have a parent entity to omit from
+export const WorkspaceCreateSchema = WorkspaceBaseCreateSchema.omit({
+  // Workspaces don't have a parent entity to omit from
   ownerId: true,
 });
 
-export const OrganizationUpdateSchema = OrganizationBaseUpdateSchema.omit({
+export const WorkspaceUpdateSchema = WorkspaceBaseUpdateSchema.omit({
   id: true,
   ownerId: true,
-});
-
-
-// ROLE SCHEMAS
-const RoleBaseCreateSchema = RoleUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
-const RoleBaseUpdateSchema = RoleUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
-
-export const RoleCreateSchema = RoleBaseCreateSchema.omit({
-  organizationId: true,
-});
-
-export const RoleUpdateSchema = RoleBaseUpdateSchema.omit({
-  id: true,
-  organizationId: true,
 });
 
 // ORGANIZATION MEMBER SCHEMAS
-const OrganizationMemberBaseCreateSchema = OrganizationMemberUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
-const OrganizationMemberBaseUpdateSchema = OrganizationMemberUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceMemberBaseCreateSchema = WorkspaceMemberUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceMemberBaseUpdateSchema = WorkspaceMemberUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
 
-export const OrganizationMemberCreateSchema = OrganizationMemberBaseCreateSchema.omit({
-  organizationId: true,
+export const WorkspaceMemberCreateSchema = WorkspaceMemberBaseCreateSchema.omit({
+  workspaceId: true,
 });
 
-export const OrganizationMemberUpdateSchema = OrganizationMemberBaseUpdateSchema.omit({
+export const WorkspaceMemberUpdateSchema = WorkspaceMemberBaseUpdateSchema.omit({
   id: true,
-  organizationId: true,
+  workspaceId: true,
 });
 
 
@@ -265,16 +264,16 @@ export const NotificationUpdateSchema = NotificationBaseUpdateSchema.omit({
 });
 
 // ORGANIZATION INVITATION SCHEMAS
-const OrganizationInvitationBaseCreateSchema = OrganizationInvitationUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
-const OrganizationInvitationBaseUpdateSchema = OrganizationInvitationUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceInvitationBaseCreateSchema = WorkspaceInvitationUncheckedCreateInputSchema as unknown as z.ZodObject<any>;
+const WorkspaceInvitationBaseUpdateSchema = WorkspaceInvitationUncheckedUpdateInputSchema as unknown as z.ZodObject<any>;
 
-export const OrganizationInvitationCreateSchema = OrganizationInvitationBaseCreateSchema.omit({
-  organizationId: true,
+export const WorkspaceInvitationCreateSchema = WorkspaceInvitationBaseCreateSchema.omit({
+  workspaceId: true,
 });
 
-export const OrganizationInvitationUpdateSchema = OrganizationInvitationBaseUpdateSchema.omit({
+export const WorkspaceInvitationUpdateSchema = WorkspaceInvitationBaseUpdateSchema.omit({
   id: true,
-  organizationId: true,
+  workspaceId: true,
 });
 
 // EXPORT TYPES FOR ALL SCHEMAS
@@ -308,14 +307,11 @@ export type ProjectFunctionUpdateInput = z.infer<typeof ProjectFunctionUpdateSch
 export type TestSuiteFunctionCreateInput = z.infer<typeof TestSuiteFunctionCreateSchema>;
 export type TestSuiteFunctionUpdateInput = z.infer<typeof TestSuiteFunctionUpdateSchema>;
 
-export type OrganizationCreateInput = z.infer<typeof OrganizationCreateSchema>;
-export type OrganizationUpdateInput = z.infer<typeof OrganizationUpdateSchema>;
+export type WorkspaceCreateInput = z.infer<typeof WorkspaceCreateSchema>;
+export type WorkspaceUpdateInput = z.infer<typeof WorkspaceUpdateSchema>;
 
-export type RoleCreateInput = z.infer<typeof RoleCreateSchema>;
-export type RoleUpdateInput = z.infer<typeof RoleUpdateSchema>;
-
-export type OrganizationMemberCreateInput = z.infer<typeof OrganizationMemberCreateSchema>;
-export type OrganizationMemberUpdateInput = z.infer<typeof OrganizationMemberUpdateSchema>;
+export type WorkspaceMemberCreateInput = z.infer<typeof WorkspaceMemberCreateSchema>;
+export type WorkspaceMemberUpdateInput = z.infer<typeof WorkspaceMemberUpdateSchema>;
 
 export type TestSuiteRunCreateInput = z.infer<typeof TestSuiteRunCreateSchema>;
 export type TestSuiteRunUpdateInput = z.infer<typeof TestSuiteRunUpdateSchema>;
@@ -329,5 +325,8 @@ export type TestStepResultUpdateInput = z.infer<typeof TestStepResultUpdateSchem
 export type NotificationCreateInput = z.infer<typeof NotificationCreateSchema>;
 export type NotificationUpdateInput = z.infer<typeof NotificationUpdateSchema>;
 
-export type OrganizationInvitationCreateInput = z.infer<typeof OrganizationInvitationCreateSchema>;
-export type OrganizationInvitationUpdateInput = z.infer<typeof OrganizationInvitationUpdateSchema>;
+export type WorkspaceInvitationCreateInput = z.infer<typeof WorkspaceInvitationCreateSchema>;
+export type WorkspaceInvitationUpdateInput = z.infer<typeof WorkspaceInvitationUpdateSchema>;
+
+export type TestCaseCommentCreateInput = z.infer<typeof TestCaseCommentCreateSchema>;
+export type TestCaseCommentUpdateInput = z.infer<typeof TestCaseCommentUpdateSchema>;

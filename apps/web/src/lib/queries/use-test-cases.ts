@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getTestCases, getTestCaseById, createTestCase, deleteTestCase, updateTestCase } from '@/lib/api/test-cases';
+import { getTestCases, getTestCaseById, createTestCase, deleteTestCase, updateTestCase } from '$lib/api/test-cases';
 import type { TestCaseCreateInput, TestCaseUpdateInput } from '@repo/types/schemas';
 
 export function useTestCases(testSuiteId: string) {
@@ -31,7 +31,7 @@ export function useCreateTestCase(testSuiteId: string) {
   const queryClient = useQueryClient();
   
   return createMutation(() => ({
-    mutationFn: (createTestCaseDto: TestCaseCreateInput) => createTestCase(testSuiteId, createTestCaseDto),
+    mutationFn: (name: string) => createTestCase(testSuiteId, name),
     onSuccess: (newTestCase) => {
       console.log('TestCase created successfully:', newTestCase);
       

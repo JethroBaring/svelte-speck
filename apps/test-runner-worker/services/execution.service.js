@@ -1,22 +1,25 @@
-const { chromium } = require("playwright");
-const path = require("path");
-const fs = require("fs");
-const websocketService = require("./websocket.service");
-const minioService = require("./minio.service");
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+const websocketService = require('./websocket.service');
+const minioService = require('./minio.service');
 
 const TestStepStatus = {
-  PENDING: "PENDING",
-  RUNNING: "RUNNING",
-  PASSED: "PASSED",
-  FAILED: "FAILED",
-  SKIPPED: "SKIPPED",
-  TIMEOUT: "TIMEOUT",
-  ERROR: "ERROR",
-}
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  PASSED: 'PASSED',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED',
+  TIMEOUT: 'TIMEOUT',
+  ERROR: 'ERROR'
+};
 
 class ExecutionService {
+  projectVariablesHash;
+  testSuiteVariablesHash;
+
   constructor() {
-    this.screenshotsDir = path.join(__dirname, "../screenshots");
+    this.screenshotsDir = path.join(__dirname, '../screenshots');
   }
 
   async executeTestCase(jobData) {
@@ -38,15 +41,15 @@ class ExecutionService {
       await this.executeTestCommands(page, code, testCaseRunId, testSuiteRunId, results);
       const duration = Date.now() - startTime;
 
-      console.log("✅ Test completed successfully");
+      console.log('✅ Test completed successfully');
       return {
         success: true,
         results,
-        duration,
+        duration
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error("❌ Test failed:", error.message);
+      console.error('❌ Test failed:', error.message);
 
       const screenshotUrl = await this.captureErrorScreenshot(page, testCaseRunId);
       return {
@@ -54,7 +57,7 @@ class ExecutionService {
         error: error.message,
         results,
         screenshotUrl,
-        duration,
+        duration
       };
     } finally {
       if (browser) {
@@ -67,47 +70,63 @@ class ExecutionService {
     return await chromium.launch({
       headless: true,
       args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--disable-gpu",
-      ],
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
     });
   }
 
   async executeTestCommands(page, code, testCaseRunId, testSuiteRunId, results) {
-    const lines = code.split("\n").filter((line) => line.trim());
+    const lines = code.split('\n').filter((line) => line.trim());
     console.log(`📝 Processing ${lines.length} commands`);
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      const [command, ...args] = line.split(" ");
+      let [command, ...args] = line.split(' ');
 
       console.log(`⚡ Step ${i + 1}: ${command}`);
 
       try {
         await websocketService.notifyTestStepStarted(testCaseRunId, testSuiteRunId, i + 1);
+        args = args.map((arg) => {
+          if (arg.startsWith('$')) {
+            const value = this.getVariableValue(arg.slice(1));
+
+            if (value == null) {
+              throw new Error(`Variable ${arg.slice(1)} not found`);
+            }
+            return value;
+          }
+          return arg;
+        });
         await this.executeCommand(page, command, args);
         const screenshotUrl = await this.captureScreenshot(page, i + 1, testCaseRunId);
-        await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, i + 1);
+        await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, i + 1, {
+          status: TestStepStatus.PASSED,
+          screenshotUrl
+        }, screenshotUrl);
         results.push({
           step: i + 1,
           command: line,
           screenshotUrl,
-          status: TestStepStatus.PASSED,
+          status: TestStepStatus.PASSED
         });
       } catch (error) {
         console.error(`❌ Step ${i + 1} failed:`, error.message);
-        await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, i + 1, { error: error.message });
+        await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, i + 1, {
+          error: error.message
+        });
         results.push({
           step: i + 1,
           command: line,
           screenshotUrl: null,
           status: TestStepStatus.FAILED,
-          error: error.message,
+          error: error.message
         });
         // Continue executing remaining steps instead of failing fast
       }
@@ -119,19 +138,16 @@ class ExecutionService {
   async executeCommand(page, command, args) {
     console.log(`Executing command: ${command} with args: ${args}`);
     switch (command) {
-      case "goto":
-        await page.goto(args.join(" ").replace(/"/g, ""));
+      case 'goto':
+        await page.goto(args.join(' ').replace(/"/g, ''));
         break;
-      case "click":
-        await page.click(args.join(" ").replace(/"/g, ""));
+      case 'click':
+        await page.click(args.join(' ').replace(/"/g, ''));
         break;
-      case "type":
-        await page.fill(
-          args[0].replace(/"/g, ""),
-          args.slice(1).join(" ").replace(/"/g, "")
-        );
+      case 'type':
+        await page.fill(args[0].replace(/"/g, ''), args.slice(1).join(' ').replace(/"/g, ''));
         break;
-      case "wait":
+      case 'wait':
         await page.waitForTimeout(parseInt(args[0]) || 1000);
         break;
       default:
@@ -165,34 +181,50 @@ class ExecutionService {
     }
   }
 
+  setVariables(projectVariablesHash, testSuiteVariablesHash) {
+    this.projectVariablesHash = new Map(projectVariablesHash);
+    this.testSuiteVariablesHash = new Map(testSuiteVariablesHash);
+  }
+
+  getVariableValue(variableName) {
+    if (this.testSuiteVariablesHash.has(variableName)) {
+      return this.testSuiteVariablesHash.get(variableName);
+    }
+
+    if (this.projectVariablesHash.has(variableName)) {
+      return this.projectVariablesHash.get(variableName);
+    }
+    return null;
+  }
+
   async captureScreenshot(page, stepNumber, testCaseRunId) {
-    const screenshot = await page.screenshot({ type: "png" });
+    const screenshot = await page.screenshot({ type: 'png' });
     const timestamp = Date.now();
     const filename = `test-case-${testCaseRunId}-step-${stepNumber}-${timestamp}.png`;
-    
+
     // Upload directly to MinIO
     const uploadResult = await minioService.uploadScreenshot(screenshot, filename);
-    
-    // Also save locally for debugging (optional)
-    const filepath = path.join(this.screenshotsDir, filename);
-    fs.writeFileSync(filepath, screenshot);
-    
+
+    // // Also save locally for debugging (optional)
+    // const filepath = path.join(this.screenshotsDir, filename);
+    // fs.writeFileSync(filepath, screenshot);
+
     return uploadResult.url;
   }
 
   async captureErrorScreenshot(page, testCaseRunId) {
     try {
       if (page) {
-        const screenshot = await page.screenshot({ type: "png" });
+        const screenshot = await page.screenshot({ type: 'png' });
         const timestamp = Date.now();
         const filename = `test-case-${testCaseRunId}-error-${timestamp}.png`;
-        
+
         // Upload directly to MinIO
         const uploadResult = await minioService.uploadScreenshot(screenshot, filename);
         return uploadResult.url;
       }
     } catch (error) {
-      console.error("Failed to capture error screenshot:", error.message);
+      console.error('Failed to capture error screenshot:', error.message);
     }
     return null;
   }

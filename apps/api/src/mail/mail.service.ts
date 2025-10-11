@@ -10,11 +10,11 @@ export class MailService {
   async sendInvitationEmail(data: {
     inviterName: string;
     inviteeEmail: string;
-    organizationName: string;
+    workspaceName: string;
     invitationLink: string;
   }) {
     const template = fs.readFileSync(
-      `./src/mail/email-templates/invitation-email.hbs`,
+      `./src/mail/email-templates/workspace-invitation-email.hbs`,
       'utf-8',
     );
     const compiledTemplate = handlebars.compile(template);
@@ -25,7 +25,7 @@ export class MailService {
       const result = await this.mailService.sendMail({
         from: 'Intervuave <intervuave@gmail.com>',
         to: data.inviteeEmail,
-        subject: `${data.organizationName} Invitation to Join Workspace`,
+        subject: `${data.workspaceName} Invitation to Join Workspace`,
         html: html,
       });
 

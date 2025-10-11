@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getProjectVariables, createProjectVariable, deleteProjectVariable } from '@/lib/api/project-variables';
+import { getProjectVariables, createProjectVariable, deleteProjectVariable } from '$lib/api/project-variables';
 import type { ProjectVariableCreateInput } from '@repo/types/schemas';
 
 export function useProjectVariables(projectId: string) {

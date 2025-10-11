@@ -26,20 +26,20 @@ model User {
   accounts      Account[]
 
   // Relations
-  createdProjects     Project[]            @relation("ProjectCreator")
-  createdPages        Page[]               @relation("PageCreator")
-  createdPageElements PageElement[]        @relation("PageElementCreator")
-  createdTestCases    TestCase[]           @relation("TestCaseCreator")
-  projectVariables    ProjectVariable[]    @relation("ProjectVariableCreator")
-  testSuiteVariables  TestSuiteVariable[]  @relation("TestSuiteVariableCreator")
-  projectFunctions    ProjectFunction[]    @relation("ProjectFunctionCreator")
-  testSuiteFunctions  TestSuiteFunction[]  @relation("TestSuiteFunctionCreator")
-  testSuites          TestSuites[]         @relation("TestSuitesCreator")
-  notifications       Notification[]       @relation("UserNotifications") // Add this line
-  organizationMembers OrganizationMember[] @relation("OrganizationMembers")
-  projectMembers      ProjectMember[]      @relation("ProjectMembers")
-
-  organization Organization? @relation("OrganizationOwner")
+  createdProjects     Project[]           @relation("ProjectCreator")
+  createdPages        Page[]              @relation("PageCreator")
+  createdPageElements PageElement[]       @relation("PageElementCreator")
+  createdTestCases    TestCase[]          @relation("TestCaseCreator")
+  projectVariables    ProjectVariable[]   @relation("ProjectVariableCreator")
+  testSuiteVariables  TestSuiteVariable[] @relation("TestSuiteVariableCreator")
+  projectFunctions    ProjectFunction[]   @relation("ProjectFunctionCreator")
+  testSuiteFunctions  TestSuiteFunction[] @relation("TestSuiteFunctionCreator")
+  testSuites          TestSuites[]        @relation("TestSuitesCreator")
+  notifications       Notification[]      @relation("UserNotifications") // Add this line
+  workspaceMembers    WorkspaceMember[]   @relation("WorkspaceMembers")
+  projectMembers      ProjectMember[]     @relation("ProjectMembers")
+  testCaseComments    TestCaseComment[]   @relation("TestCaseCommentCreator")
+  workspaces          Workspace[]         @relation("WorkspaceOwner")
 
   @@unique([email])
   @@map("user")
@@ -90,69 +90,46 @@ model Verification {
   @@map("verification")
 }
 
-model Organization {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  ownerId     String?  @unique @map("owner_id")
-  owner       User?    @relation("OrganizationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  icon      String?
+  ownerId   String?  @map("owner_id")
+  owner     User?    @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  roles Role[]
+  members     WorkspaceMember[]
+  invitations WorkspaceInvitation[] @relation("WorkspaceInvitations")
+  projects    Project[]
 
-  members  OrganizationMember[]
-  invitations OrganizationInvitation[] @relation("OrganizationInvitations")
-  projects Project[]
-
-  @@map("organizations")
+  @@map("workspaces")
 }
 
-model Role {
-  id             String    @id @default(uuid())
-  organizationId String
-  name           String
-  scope          RoleLevel @default(ORGANIZATION)
+model WorkspaceMember {
+  id          String @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        Role
 
-  access       RoleAccess
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  permissions  String       @db.Text // JSON string
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user           User            @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
+  projectMembers ProjectMember[] @relation("ProjectWorkspaceMembers")
 
-  organizationMembers OrganizationMember[]
-  organizationInvitations OrganizationInvitation[] @relation("OrganizationInvitations")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([organizationId, name])
-  @@map("roles")
-}
-
-model OrganizationMember {
-  id             String @id @default(uuid())
-  organizationId String
-  userId         String
-  roleId         String
-
-  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           Role            @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user           User            @relation("OrganizationMembers", fields: [userId], references: [id], onDelete: Cascade)
-  projectMembers ProjectMember[] @relation("ProjectOrganizationMembers")
-
-  @@unique([organizationId, userId])
-  @@map("organization_members")
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
 }
 
 model Project {
-  id             String   @id @default(uuid())
-  organizationId String
-  name           String
-  description    String?
-  baseUrl        String?  @map("base_url")
-  createdBy      String?  @map("created_by")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  workspaceId String
+  name        String
+  baseUrl     String?  @map("base_url")
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   creator         User?             @relation("ProjectCreator", fields: [createdBy], references: [id])
   pages           Page[]            @relation("ProjectPages")
@@ -165,25 +142,26 @@ model Project {
 }
 
 model ProjectMember {
-  id                   String @id @default(uuid())
-  projectId            String
-  organizationMemberId String @unique @map("organization_member_id")
+  id                String     @id @default(uuid())
+  projectId         String
+  workspaceMemberId String     @map("workspace_member_id")
+  permission        Permission
 
-  project            Project            @relation("ProjectMembers", fields: [projectId], references: [id], onDelete: Cascade)
-  user               User[]             @relation("ProjectMembers")
-  organizationMember OrganizationMember @relation("ProjectOrganizationMembers", fields: [organizationMemberId], references: [id], onDelete: Cascade)
+  project         Project         @relation("ProjectMembers", fields: [projectId], references: [id], onDelete: Cascade)
+  user            User[]          @relation("ProjectMembers")
+  workspaceMember WorkspaceMember @relation("ProjectWorkspaceMembers", fields: [workspaceMemberId], references: [id], onDelete: Cascade)
 
+  @@unique([projectId, workspaceMemberId])
   @@map("project_members")
 }
 
 model TestSuites {
-  id          String   @id @default(uuid())
-  projectId   String   @map("project_id")
-  name        String
-  description String?
-  createdBy   String?  @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  name      String
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   project   Project             @relation("ProjectTestSuites", fields: [projectId], references: [id], onDelete: Cascade)
@@ -198,15 +176,14 @@ model TestSuites {
 
 // NEW: Project-level (global) variables
 model ProjectVariable {
-  id          String   @id @default(uuid())
-  projectId   String   @map("project_id")
-  name        String // Variable name (without @ symbol)
-  value       String // Selector or value
-  type        String // 'string' or 'number' or 'boolean'
-  description String?
-  createdBy   String?  @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  name      String // Variable name (without @ symbol)
+  value     String // Selector or value
+  type      String // 'String' or 'Number' or 'Boolean'
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation("ProjectVariables", fields: [projectId], references: [id], onDelete: Cascade)
@@ -222,8 +199,7 @@ model TestSuiteVariable {
   testSuiteId String   @map("test_suite_id")
   name        String // Variable name (without @ symbol)
   value       String // Selector or value
-  type        String // 'string' or 'number' or 'boolean'
-  description String?
+  type        String // 'String' or 'Number' or 'Boolean'
   createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -238,15 +214,14 @@ model TestSuiteVariable {
 
 // NEW: Project-level (global) functions
 model ProjectFunction {
-  id          String   @id @default(uuid())
-  projectId   String   @map("project_id")
-  name        String // Function name
-  parameters  String? // Parameters for the function
-  code        String   @db.Text // DSL code for the function
-  description String?
-  createdBy   String?  @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  projectId  String   @map("project_id")
+  name       String // Function name
+  parameters String? // Parameters for the function
+  code       String   @db.Text // DSL code for the function
+  createdBy  String?  @map("created_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
   project Project @relation("ProjectFunctions", fields: [projectId], references: [id], onDelete: Cascade)
@@ -263,7 +238,6 @@ model TestSuiteFunction {
   name        String // Function name
   parameters  String? // Parameters for the function
   code        String   @db.Text // DSL code for the function
-  description String?
   createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -277,15 +251,15 @@ model TestSuiteFunction {
 }
 
 model TestSuiteRun {
-  id           String        @id @default(uuid())
-  testSuiteId  String        @map("test_suite_id")
+  id           String             @id @default(uuid())
+  testSuiteId  String             @map("test_suite_id")
   status       TestSuiteRunStatus @default(RUNNING)
-  startedAt    DateTime      @default(now()) @map("started_at")
-  completedAt  DateTime?     @map("completed_at")
-  totalTests   Int           @default(0) @map("total_tests")
-  passedTests  Int           @default(0) @map("passed_tests")
-  failedTests  Int           @default(0) @map("failed_tests")
-  skippedTests Int           @default(0) @map("skipped_tests")
+  startedAt    DateTime           @default(now()) @map("started_at")
+  completedAt  DateTime?          @map("completed_at")
+  totalTests   Int                @default(0) @map("total_tests")
+  passedTests  Int                @default(0) @map("passed_tests")
+  failedTests  Int                @default(0) @map("failed_tests")
+  skippedTests Int                @default(0) @map("skipped_tests")
 
   // Relations
   testSuite    TestSuites    @relation("TestSuiteRuns", fields: [testSuiteId], references: [id], onDelete: Cascade)
@@ -335,7 +309,6 @@ model Page {
   projectId    String   @map("project_id")
   name         String
   url          String
-  description  String?
   isProtected  Boolean  @default(false) @map("is_protected") // NEW: Auth required
   authFunction String?  @map("auth_function") // NEW: Function name for auth
   createdBy    String?  @map("created_by")
@@ -354,7 +327,6 @@ model PageElement {
   pageId      String   @map("page_id")
   elementName String   @map("element_name")
   selector    String
-  description String?
   createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -369,17 +341,31 @@ model TestCase {
   id          String   @id @default(uuid())
   testSuiteId String?  @map("test_suite_id")
   name        String
-  description String?
   code        String   @db.Text
   createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  testSuite    TestSuites?   @relation("TestSuiteTestCases", fields: [testSuiteId], references: [id])
-  creator      User?         @relation("TestCaseCreator", fields: [createdBy], references: [id])
-  testCaseRuns TestCaseRun[] @relation("TestCaseRuns")
+  testSuite    TestSuites?       @relation("TestSuiteTestCases", fields: [testSuiteId], references: [id])
+  creator      User?             @relation("TestCaseCreator", fields: [createdBy], references: [id])
+  testCaseRuns TestCaseRun[]     @relation("TestCaseRuns")
+  comments     TestCaseComment[] @relation("TestCaseComments")
 
   @@map("test_cases")
+}
+
+model TestCaseComment {
+  id         String   @id @default(uuid())
+  testCaseId String   @map("test_case_id")
+  comment    String
+  createdBy  String?  @map("created_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  testCase TestCase @relation("TestCaseComments", fields: [testCaseId], references: [id])
+  creator  User?    @relation("TestCaseCommentCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("test_case_comments")
 }
 
 model Notification {
@@ -399,18 +385,17 @@ model Notification {
   @@map("notifications")
 }
 
-model OrganizationInvitation {
-  id        String   @id @default(uuid())
-  organizationId String
-  email String
-  status ProjectInvitationStatus @default(PENDING)
-  roleId String
-  role Role @relation("OrganizationInvitations", fields: [roleId], references: [id], onDelete: Cascade)
-  organization Organization @relation("OrganizationInvitations", fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model WorkspaceInvitation {
+  id          String                  @id @default(uuid())
+  workspaceId String
+  email       String
+  status      ProjectInvitationStatus @default(PENDING)
+  role        String
+  workspace   Workspace               @relation("WorkspaceInvitations", fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
 
-  @@map("organization_invitations")
+  @@map("workspace_invitations")
 }
 
 enum NotificationType {
@@ -457,15 +442,15 @@ enum TestStepStatus {
   ERROR
 }
 
-enum RoleLevel {
-  ORGANIZATION
-  PROJECT
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
 }
 
-enum RoleAccess {
-  FULL
-  LIMITED
-  CUSTOM
+enum Permission {
+  VIEWER
+  EDITOR
 }
 
 generator zod {

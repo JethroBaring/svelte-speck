@@ -15,11 +15,10 @@ import { TestSuitesModule } from './test-suites/test-suites.module';
 import { ProjectsModule } from './projects/projects.module';
 import { PagesModule } from './pages/pages.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { OrganizationModule } from './organization/organization.module';
-import { OrganizationMembersModule } from './organization-members/organization-members.module';
-import { OrganizationRolesModule } from './organization-roles/organization-roles.module';
+import { WorkspaceModule } from './workspaces/workspace.module';
+import { WorkspaceMembersModule } from './workspace-members/workspace-members.module';
 import { MailModule } from './mail/mail.module';
-import { OrganizationInvitationsModule } from './organization-invitations/organization-invitations.module';
+import { WorkspaceInvitationsModule } from './workspace-invitations/workspace-invitations.module';
 import { MinioModule } from "./common/minio/minio.module";
 import { TestRunnerModule } from './test-runner/test-runner.module';
 
@@ -47,11 +46,10 @@ import { TestRunnerModule } from './test-runner/test-runner.module';
     TestSuiteFunctionsModule,
     ProjectFunctionsModule,
     PagesModule,
-    OrganizationModule,
-    OrganizationMembersModule,
-    OrganizationRolesModule,
+    WorkspaceModule,
+    WorkspaceMembersModule,
     MailModule,
-    OrganizationInvitationsModule,
+    WorkspaceInvitationsModule,
     MinioModule,
     TestRunnerModule,
   ],

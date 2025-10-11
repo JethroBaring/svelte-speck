@@ -166,38 +166,26 @@ exports.Prisma.VerificationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.OrganizationScalarFieldEnum = {
+exports.Prisma.WorkspaceScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  description: 'description',
+  icon: 'icon',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.RoleScalarFieldEnum = {
+exports.Prisma.WorkspaceMemberScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
-  name: 'name',
-  scope: 'scope',
-  access: 'access',
-  permissions: 'permissions',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.OrganizationMemberScalarFieldEnum = {
-  id: 'id',
-  organizationId: 'organizationId',
+  workspaceId: 'workspaceId',
   userId: 'userId',
-  roleId: 'roleId'
+  role: 'role'
 };
 
 exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
+  workspaceId: 'workspaceId',
   name: 'name',
-  description: 'description',
   baseUrl: 'baseUrl',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
@@ -207,14 +195,14 @@ exports.Prisma.ProjectScalarFieldEnum = {
 exports.Prisma.ProjectMemberScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
-  organizationMemberId: 'organizationMemberId'
+  workspaceMemberId: 'workspaceMemberId',
+  permission: 'permission'
 };
 
 exports.Prisma.TestSuitesScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
   name: 'name',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -226,7 +214,6 @@ exports.Prisma.ProjectVariableScalarFieldEnum = {
   name: 'name',
   value: 'value',
   type: 'type',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -238,7 +225,6 @@ exports.Prisma.TestSuiteVariableScalarFieldEnum = {
   name: 'name',
   value: 'value',
   type: 'type',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -250,7 +236,6 @@ exports.Prisma.ProjectFunctionScalarFieldEnum = {
   name: 'name',
   parameters: 'parameters',
   code: 'code',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -262,7 +247,6 @@ exports.Prisma.TestSuiteFunctionScalarFieldEnum = {
   name: 'name',
   parameters: 'parameters',
   code: 'code',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -309,7 +293,6 @@ exports.Prisma.PageScalarFieldEnum = {
   projectId: 'projectId',
   name: 'name',
   url: 'url',
-  description: 'description',
   isProtected: 'isProtected',
   authFunction: 'authFunction',
   createdBy: 'createdBy',
@@ -322,7 +305,6 @@ exports.Prisma.PageElementScalarFieldEnum = {
   pageId: 'pageId',
   elementName: 'elementName',
   selector: 'selector',
-  description: 'description',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -332,8 +314,16 @@ exports.Prisma.TestCaseScalarFieldEnum = {
   id: 'id',
   testSuiteId: 'testSuiteId',
   name: 'name',
-  description: 'description',
   code: 'code',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TestCaseCommentScalarFieldEnum = {
+  id: 'id',
+  testCaseId: 'testCaseId',
+  comment: 'comment',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -351,12 +341,12 @@ exports.Prisma.NotificationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.OrganizationInvitationScalarFieldEnum = {
+exports.Prisma.WorkspaceInvitationScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
+  workspaceId: 'workspaceId',
   email: 'email',
   status: 'status',
-  roleId: 'roleId',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -375,15 +365,15 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-exports.RoleLevel = exports.$Enums.RoleLevel = {
-  ORGANIZATION: 'ORGANIZATION',
-  PROJECT: 'PROJECT'
+exports.Role = exports.$Enums.Role = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
 };
 
-exports.RoleAccess = exports.$Enums.RoleAccess = {
-  FULL: 'FULL',
-  LIMITED: 'LIMITED',
-  CUSTOM: 'CUSTOM'
+exports.Permission = exports.$Enums.Permission = {
+  VIEWER: 'VIEWER',
+  EDITOR: 'EDITOR'
 };
 
 exports.TestSuiteRunStatus = exports.$Enums.TestSuiteRunStatus = {
@@ -435,9 +425,8 @@ exports.Prisma.ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  Organization: 'Organization',
-  Role: 'Role',
-  OrganizationMember: 'OrganizationMember',
+  Workspace: 'Workspace',
+  WorkspaceMember: 'WorkspaceMember',
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   TestSuites: 'TestSuites',
@@ -451,8 +440,9 @@ exports.Prisma.ModelName = {
   Page: 'Page',
   PageElement: 'PageElement',
   TestCase: 'TestCase',
+  TestCaseComment: 'TestCaseComment',
   Notification: 'Notification',
-  OrganizationInvitation: 'OrganizationInvitation'
+  WorkspaceInvitation: 'WorkspaceInvitation'
 };
 
 /**

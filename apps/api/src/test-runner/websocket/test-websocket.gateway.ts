@@ -37,6 +37,7 @@ export interface TestProgressData {
     stepNumber: number;
     status: string;
     error?: string;
+    screenshotUrl?: string;
   };
   timestamp: string;
 }
@@ -291,6 +292,7 @@ export class TestWebSocketGateway
   }
 
   emitTestStepCompleted(data: TestProgressData) {
+    console.log("emitTestStepCompleted", data);
     this.server
       .to(`test-suite-${data.testSuiteRunId}`)
       .emit('test-step-completed', {

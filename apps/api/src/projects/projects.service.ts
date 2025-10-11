@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma, RoleLevel } from "@repo/types/prisma";
+import { Permission, Prisma } from "@repo/types/prisma";
 import { PrismaService } from "src/prisma/prisma.service";
 
 
@@ -9,19 +9,19 @@ export class ProjectsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(organizationId: string, userId: string, createProjectDto: Prisma.ProjectUncheckedCreateInput) {
+  async create(workspaceId: string, userId: string, createProjectDto: Prisma.ProjectUncheckedCreateInput) {
     const project = await this.prisma.project.create({
       data: {
         ...createProjectDto,
         createdBy: userId,
-        organizationId,
+        workspaceId,
       }
     })
     
-    const organizationMember = await this.prisma.organizationMember.findUnique({
+    const workspaceMember = await this.prisma.workspaceMember.findUnique({
       where: {
-        organizationId_userId: {
-          organizationId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
@@ -30,30 +30,31 @@ export class ProjectsService {
     await this.prisma.projectMember.create({
       data: {
         projectId: project.id,
-        organizationMemberId: organizationMember?.id!,
+        permission: Permission.EDITOR,
+        workspaceMemberId: workspaceMember?.id!,
       },
     })
 
     return project
   }
 
-  async findAll(organizationId: string, userId: string) {
-    const organizationMember = await this.prisma.organizationMember.findUnique({
+  async findAll(workspaceId: string, userId: string) {
+    const workspaceMember = await this.prisma.workspaceMember.findUnique({
       where: {
-        organizationId_userId: {
-          organizationId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
     })
 
-    console.log("organizationMember", organizationMember);
+    console.log("workspaceMember", workspaceMember);
 
     return await this.prisma.project.findMany({
       where: {
         members: {
           some: {
-            organizationMemberId: organizationMember?.id!
+            workspaceMemberId: workspaceMember?.id!
           }
         }
       },

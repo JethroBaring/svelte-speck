@@ -1,7 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getTestSuites, getTestSuiteById, createTestSuite, deleteTestSuite, runTestSuite } from '@/lib/api/test-suites';
-import type { TestSuiteCreateInput } from '@repo/types/schemas';
+import { getTestSuites, getTestSuiteById, createTestSuite, deleteTestSuite, runTestSuite, getLatestTestSuiteRun } from '$lib/api/test-suites';
 
 export function useTestSuites(projectId: string) {
   return createQuery(() => ({
@@ -34,7 +33,7 @@ export function useCreateTestSuite(projectId: string) {
   const queryClient = useQueryClient();
   
   return createMutation(() => ({
-    mutationFn: (createTestSuiteDto: TestSuiteCreateInput) => createTestSuite(projectId, createTestSuiteDto),
+    mutationFn: (name: string) => createTestSuite(projectId, name),
     onSuccess: (newTestSuite) => {
       console.log('TestSuite created successfully:', newTestSuite);
       
@@ -113,5 +112,12 @@ export function useDeleteTestSuite(projectId: string) {
 export function useRunTestSuite(testSuiteId: string) {
   return createMutation(() => ({
     mutationFn: () => runTestSuite(testSuiteId),
+  }));
+}
+
+export function useLatestTestSuiteRun(testSuiteId: string) {
+  return createQuery(() => ({
+    queryKey: ['test-suite', 'latest-run', testSuiteId],
+    queryFn: () => getLatestTestSuiteRun(testSuiteId),
   }));
 }

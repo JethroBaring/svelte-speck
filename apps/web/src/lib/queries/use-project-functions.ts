@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getProjectFunctions, createProjectFunction, deleteProjectFunction } from '@/lib/api/project-functions';
+import { getProjectFunctions, createProjectFunction, deleteProjectFunction } from '$lib/api/project-functions';
 import type { ProjectFunctionCreateInput } from '@repo/types/schemas';
 
 export function useProjectFunctions(projectId: string) {

@@ -1,0 +1,3 @@
+<dir>
+  error page
+</dir>

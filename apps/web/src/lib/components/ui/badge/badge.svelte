@@ -1,74 +1,50 @@
-<script lang="ts">
-	type BadgeVariant = 'light' | 'solid';
-	type BadgeSize = 'sm' | 'md';
-	type BadgeColor = 'primary' | 'success' | 'error' | 'warning' | 'info' | 'light' | 'dark';
+<script lang="ts" module>
+	import { type VariantProps, tv } from "tailwind-variants";
 
-	interface Props {
-		variant?: BadgeVariant;
-		size?: BadgeSize;
-		color?: BadgeColor;
-		startIcon?: any;
-		endIcon?: any;
-		children?: any;
-	}
-
-	let {
-		variant = 'light',
-		color = 'primary',
-		size = 'md',
-		startIcon,
-		endIcon,
-		children
-	}: Props = $props();
-
-	const baseStyles =
-		'inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium capitalize';
-
-	const sizeStyles = {
-		sm: 'text-theme-xs',
-		md: 'text-sm'
-	};
-
-	const variants = {
-		light: {
-			primary: 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400',
-			success: 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500',
-			error: 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
-			warning: 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400',
-			info: 'bg-blue-light-50 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500',
-			light: 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80',
-			dark: 'bg-gray-500 text-white dark:bg-white/5 dark:text-white'
+	export const badgeVariants = tv({
+		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3",
+		variants: {
+			variant: {
+				default:
+					"bg-primary text-primary-foreground [a&]:hover:bg-primary/90 border-transparent",
+				secondary:
+					"bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 border-transparent",
+				destructive:
+					"bg-destructive [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70 border-transparent text-white",
+				outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+			},
 		},
-		solid: {
-			primary: 'bg-brand-500 text-white dark:text-white',
-			success: 'bg-success-500 text-white dark:text-white',
-			error: 'bg-error-500 text-white dark:text-white',
-			warning: 'bg-warning-500 text-white dark:text-white',
-			info: 'bg-blue-light-500 text-white dark:text-white',
-			light: 'bg-gray-400 dark:bg-white/5 text-white dark:text-white/80',
-			dark: 'bg-gray-700 text-white dark:text-white'
-		}
-	};
+		defaultVariants: {
+			variant: "default",
+		},
+	});
 
-	const sizeClass = $derived(sizeStyles[size]);
-	const colorStyles = $derived(variants[variant][color]);
+	export type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 </script>
 
-<span class="{baseStyles} {sizeClass} {colorStyles}">
-	{#if startIcon}
-		<span class="mr-1">
-			{@render icon(startIcon)}
-		</span>
-	{/if}
-	{@render children?.()}
-	{#if endIcon}
-		<span class="ml-1">
-			{@render icon(endIcon)}
-		</span>
-	{/if}
-</span>
+<script lang="ts">
+	import type { HTMLAnchorAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 
-{#snippet icon(icon: any)}
-	{@const Icon = icon}
-	<Icon />
-{/snippet}
+	let {
+		ref = $bindable(null),
+		href,
+		class: className,
+		variant = "default",
+		children,
+		...restProps
+	}: WithElementRef<HTMLAnchorAttributes> & {
+		variant?: BadgeVariant;
+	} = $props();
+</script>
+
+<svelte:element
+	this={href ? "a" : "span"}
+	bind:this={ref}
+	data-slot="badge"
+	{href}
+	class={cn(badgeVariants({ variant }), className)}
+	{...restProps}
+>
+	{@render children?.()}
+</svelte:element>

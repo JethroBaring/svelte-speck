@@ -12,14 +12,8 @@ export class TestQueueController {
   @Public()
   async runTestSuite(
     @Param('testSuiteId') testSuiteId: string,
-    @Body()
-    body: {
-      environment: string;
-      browser: string;
-      version?: string;
-    },
   ) {
-    return await this.testQueueService.runTestSuite(testSuiteId, body);
+    return await this.testQueueService.runTestSuite(testSuiteId);
   }
 
   @Put('cancel-suite-run/:testSuiteRunId')

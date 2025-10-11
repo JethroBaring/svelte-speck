@@ -1,1 +1,0 @@
-import Root from './file-input.svelte'
