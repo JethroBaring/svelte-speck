@@ -20,11 +20,16 @@ import { WorkspaceMembersModule } from './workspace-members/workspace-members.mo
 import { MailModule } from './mail/mail.module';
 import { WorkspaceInvitationsModule } from './workspace-invitations/workspace-invitations.module';
 import { MinioModule } from "./common/minio/minio.module";
-import { TestRunnerModule } from './test-runner/test-runner.module';
+import { RedisModule } from "./common/redis";
+import { WebSocketModule } from "./common/websocket";
+import { TestSuiteRunsModule } from './test-suite-runs/test-suite-runs.module';
+import { WorkerModule } from './worker/worker.module';
 
 @Module({
   imports: [
     PrismaModule,
+    RedisModule,
+    WebSocketModule,
     ConfigModule.forRoot({
       isGlobal: true
     }),
@@ -51,7 +56,8 @@ import { TestRunnerModule } from './test-runner/test-runner.module';
     MailModule,
     WorkspaceInvitationsModule,
     MinioModule,
-    TestRunnerModule,
+    TestSuiteRunsModule,
+    WorkerModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

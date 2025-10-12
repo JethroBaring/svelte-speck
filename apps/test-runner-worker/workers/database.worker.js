@@ -43,6 +43,7 @@ const worker = new Worker(
 
       return { success: true, type, testCaseRunId };
     } catch (error) {
+      console.log(error)
       console.error(
         `❌ Database update failed for ${testCaseRunId}:`,
         error.message

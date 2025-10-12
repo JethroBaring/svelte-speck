@@ -1,27 +1,25 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UsePipes,
+  Get,
+  Param,
+  Patch,
+  Post
 } from '@nestjs/common';
-import { TestSuitesService } from './test-suites.service';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation-pipe';
 import { TestCasesService } from 'src/test-cases/test-cases.service';
-import { TestSuiteVariablesService } from 'src/test-suite-variables/test-suite-variables.service';
 import { TestSuiteFunctionsService } from 'src/test-suite-functions/test-suite-functions.service';
+import { TestSuiteVariablesService } from 'src/test-suite-variables/test-suite-variables.service';
+import { TestSuitesService } from './test-suites.service';
 
 import {
-  TestSuiteVariableCreateSchema,
-  TestSuiteVariableUpdateSchema,
+  TestCaseCreateSchema,
   TestSuiteFunctionCreateSchema,
   TestSuiteFunctionUpdateSchema,
-  TestCaseCreateSchema,
   TestSuiteUpdateSchema,
-  TestSuiteRunCreateSchema,
+  TestSuiteVariableCreateSchema,
+  TestSuiteVariableUpdateSchema
 } from '@repo/types/schemas';
 
 @Controller('test-suites')
@@ -51,12 +49,7 @@ export class TestSuitesController {
   remove(@Param('id') id: string) {
     return this.testSuitesService.remove(id);
   }
-
-  @Get(':id/latest-run')
-  findCurrentRun(@Param('id') id: string) {
-    return this.testSuitesService.findLatestRun(id);
-  }
-
+  
   @Post(':id/test-cases')
   createTestCase(
     @Param('id') id: string,

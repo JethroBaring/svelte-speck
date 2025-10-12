@@ -29,7 +29,7 @@ class WebsocketService {
     const url = `${this.baseUrl}/test-runner${path}`;
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.WORKER_API_KEY },
       body: body ? JSON.stringify(body) : undefined,
     });
 

@@ -16,7 +16,7 @@ export class TestSuiteRunnerStore {
   })
   
 	constructor() {
-    this.socket = io('http://localhost:3000/test-runner', {
+    this.socket = io('http://localhost:3000/test-suite-runs', {
       transports: ['websocket'],
       autoConnect: false,
     })

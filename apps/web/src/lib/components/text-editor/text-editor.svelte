@@ -57,7 +57,8 @@
 		'hover',
 		'scroll',
 		'assert',
-		'expect'
+		'expect',
+		'call'
 	];
 	const KEYWORDS = [
 		'into',
@@ -340,16 +341,9 @@
 		let inserted = chosen.value;
 		let newCaret: number;
 		if (chosen.kind === 'function') {
-			// If next non-space char is already '(', insert only name; else insert name + "()" and place caret inside
-			let k = caret;
-			while (k < currentText.length && /\s/.test(currentText[k])) k += 1;
-			if (currentText[k] === '(') {
-				inserted = chosen.value;
-				newCaret = start + inserted.length;
-			} else {
-				inserted = `${chosen.value}()`;
-				newCaret = start + chosen.value.length + 1; // inside parentheses
-			}
+			// Just insert the function name without parentheses
+			inserted = `${chosen.value} `;
+			newCaret = start + inserted.length;
 		} else if (chosen.kind === 'variable') {
 			// For variables, prepend $ and don't add space
 			inserted = `$${chosen.value} `;
@@ -706,16 +700,12 @@
 				continue;
 			}
 
-			// Function names from defined list (highlight name; parentheses will be colored as punctuation)
+			// Function names from defined list (highlight name without requiring parentheses)
 			if (isBoundaryBefore(i)) {
 				const identMatch = text.slice(i).match(/^[A-Za-z_][\w-]*/);
 				if (identMatch) {
 					const name = identMatch[0];
-					// Optionally require next non-space to be '(' to avoid false positives
-					let k = i + name.length;
-					while (k < text.length && /\s/.test(text[k])) k += 1;
-					const nextIsParen = text[k] === '(';
-					if (FUNCTION_WORDS_SET.has(name.toLowerCase()) && nextIsParen) {
+					if (FUNCTION_WORDS_SET.has(name.toLowerCase()) && isBoundaryAfter(i, name.length)) {
 						appendSpan(name, COLORS.function);
 						i += name.length;
 						continue;

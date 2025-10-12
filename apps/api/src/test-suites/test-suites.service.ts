@@ -90,22 +90,4 @@ export class TestSuitesService {
 
     return testSuiteRun;
   }
-
-  async findLatestRun(testSuiteId: string) {
-    return await this.prisma.testSuiteRun.findFirst({
-      where: {
-        testSuiteId,
-      },
-      orderBy: {
-        startedAt: 'desc' as const,
-      },
-      include: {
-        testCaseRuns: {
-          include: {
-            stepResults: true,
-          },
-        }
-      },
-    });
-  }
 }

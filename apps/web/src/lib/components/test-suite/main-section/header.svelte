@@ -2,18 +2,17 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { CREATE_TEST_CASE_MODAL_KEY } from '$lib/constants/modal-keys';
-	import { useLatestTestSuiteRun, useRunTestSuite } from '$lib/queries/use-test-suites';
+	import { useLatestTestSuiteRun, useRunTestSuite } from '$lib/queries/use-test-suite-runs';
 	import { getModalStore } from '$lib/stores/ui/modal-store.svelte';
 	import { getTestCasesStore } from "$lib/stores/ui/test-cases-store.svelte";
 	import { getTestSuiteStore } from '$lib/stores/ui/test-suite-store.svelte';
 	import { getTestSuiteRunnerStore } from '$lib/stores/websocket/test-suite-runner-store.svelte';
 	import CheckCircleIcon from '@lucide/svelte/icons/check-circle';
 	import ClockIcon from '@lucide/svelte/icons/clock';
-	import { default as FileText, default as FileTextIcon } from '@lucide/svelte/icons/file-text';
+	import { default as FileText } from '@lucide/svelte/icons/file-text';
 	import PlayIcon from '@lucide/svelte/icons/play';
 	import PlusCircleIcon from '@lucide/svelte/icons/plus-circle';
 	import moment from "moment";
-	import { onMount } from "svelte";
 
 	const testSuiteId = $derived(page.params.testSuiteId);
 	const modalStore = getModalStore(CREATE_TEST_CASE_MODAL_KEY);

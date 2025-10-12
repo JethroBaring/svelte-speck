@@ -1,6 +1,6 @@
 // hooks/useUsers.ts
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getTestSuites, getTestSuiteById, createTestSuite, deleteTestSuite, runTestSuite, getLatestTestSuiteRun } from '$lib/api/test-suites';
+import { getTestSuites, getTestSuiteById, createTestSuite, deleteTestSuite } from '$lib/api/test-suites';
 
 export function useTestSuites(projectId: string) {
   return createQuery(() => ({
@@ -106,18 +106,5 @@ export function useDeleteTestSuite(projectId: string) {
       // If the mutation fails, we could show an error toast here
       console.error('Failed to delete test suite:', err);
     },
-  }));
-}
-
-export function useRunTestSuite(testSuiteId: string) {
-  return createMutation(() => ({
-    mutationFn: () => runTestSuite(testSuiteId),
-  }));
-}
-
-export function useLatestTestSuiteRun(testSuiteId: string) {
-  return createQuery(() => ({
-    queryKey: ['test-suite', 'latest-run', testSuiteId],
-    queryFn: () => getLatestTestSuiteRun(testSuiteId),
   }));
 }

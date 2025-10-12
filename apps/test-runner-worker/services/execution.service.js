@@ -17,6 +17,8 @@ const TestStepStatus = {
 class ExecutionService {
   projectVariablesHash;
   testSuiteVariablesHash;
+  projectFunctionsHash;
+  testSuiteFunctionsHash;
 
   constructor() {
     this.screenshotsDir = path.join(__dirname, '../screenshots');
@@ -136,7 +138,6 @@ class ExecutionService {
   }
 
   async executeCommand(page, command, args) {
-    console.log(`Executing command: ${command} with args: ${args}`);
     switch (command) {
       case 'goto':
         await page.goto(args.join(' ').replace(/"/g, ''));
@@ -150,8 +151,25 @@ class ExecutionService {
       case 'wait':
         await page.waitForTimeout(parseInt(args[0]) || 1000);
         break;
+      case 'call':
+        await this.executeFunction(page, args[0], args.slice(1));
+        break;
       default:
         throw new Error(`Unknown command: ${command}`);
+    }
+  }
+
+  async executeFunction(page, functionName, args) {
+    const functionCode = this.getFunctionValue(functionName);
+    if (functionCode == null) {
+      throw new Error(`Function ${functionName} not found`);
+    }
+
+    const functionLines = functionCode.split('\n').filter((line) => line.trim());
+    for (let i = 0; i < functionLines.length; i++) {
+      const line = functionLines[i].trim();
+      let [command, ...args] = line.split(' ');
+      await this.executeCommand(page, command, args);
     }
   }
 
@@ -186,6 +204,11 @@ class ExecutionService {
     this.testSuiteVariablesHash = new Map(testSuiteVariablesHash);
   }
 
+  setFunctions(projectFunctionsHash, testSuiteFunctionsHash) {
+    this.projectFunctionsHash = new Map(projectFunctionsHash);
+    this.testSuiteFunctionsHash = new Map(testSuiteFunctionsHash);
+  }
+
   getVariableValue(variableName) {
     if (this.testSuiteVariablesHash.has(variableName)) {
       return this.testSuiteVariablesHash.get(variableName);
@@ -193,6 +216,17 @@ class ExecutionService {
 
     if (this.projectVariablesHash.has(variableName)) {
       return this.projectVariablesHash.get(variableName);
+    }
+    return null;
+  }
+
+  getFunctionValue(functionName) {
+    if (this.testSuiteFunctionsHash.has(functionName)) {
+      return this.testSuiteFunctionsHash.get(functionName);
+    }
+
+    if (this.projectFunctionsHash.has(functionName)) {
+      return this.projectFunctionsHash.get(functionName);
     }
     return null;
   }
