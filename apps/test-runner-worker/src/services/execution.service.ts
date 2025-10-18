@@ -1,6 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
 import * as path from 'path';
 import * as fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 import websocketService from './websocket.service';
 import minioService from './minio.service';
 import { Scanner, Parser, Interpreter, Environment } from '@repo/interpreter';
@@ -45,15 +46,11 @@ interface SetupState {
 interface TestStepResult {
   id?: string;
   testCaseRunId: string;
+  parentStepId?: string;
   stepNumber: number;
-  stepName?: string;
-  stmtType?: string;
-  lineNumber?: number;
-  parentStepResultId?: string;
-  iteration?: number;
-  contextType: StepContextType;
-  contextName?: string;
-  // metadata?: Record<string, any>;
+  stepName: string;
+  stmtType: string;
+  contextType?: string;
   status: TestStepStatus;
   startedAt: Date;
   completedAt?: Date;
@@ -61,6 +58,7 @@ interface TestStepResult {
   errorMessage?: string;
   screenshot?: string;
   logs?: string;
+  isLastStep?: boolean;
 }
 
 interface ExecutionResult {
@@ -313,32 +311,34 @@ class ExecutionService {
     results: TestStepResult[],
     parentStepResultId?: string
   ): Promise<void> {
-    for (const statement of statements) {
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i];
       const stepNumber = this.incrementStepNumber();
       const stmtType = statement.constructor.name;
       const stepName = this.getStatementDescription(statement);
       const contextType = this.getStatementContextType(statement);
       const currentContext = this.getCurrentContext();
       const metadata = this.extractStatementMetadata(statement);
+      const isLastStep = i === statements.length - 1;
 
       console.log(`⚡ Step ${stepNumber}: ${stepName}`);
 
       const stepResult: TestStepResult = {
+        id: uuidv4(),
         testCaseRunId,
         stepNumber,
         stepName,
         stmtType,
-        parentStepResultId,
-        iteration: currentContext?.iteration,
-        contextType: currentContext?.type || StepContextType.NONE,
-        contextName: currentContext?.name,
-        // metadata,
+        parentStepId: parentStepResultId,
+        contextType: (currentContext?.type || StepContextType.NONE).toString(),
         status: TestStepStatus.RUNNING,
-        startedAt: new Date()
+        startedAt: new Date(),
+        isLastStep
       };
 
       try {
-        await websocketService.notifyTestStepStarted(testCaseRunId, testSuiteRunId, stepNumber);
+        console.log('📤 Sending step result to websocket:', JSON.stringify(stepResult, null, 2));
+        await websocketService.notifyTestStepStarted(testCaseRunId, testSuiteRunId, stepResult);
 
         // Handle special control flow statements
         if (stmtType === 'RepeatStmt') {
@@ -356,7 +356,7 @@ class ExecutionService {
         }
       } catch (error) {
         console.error(`❌ Step ${stepNumber} failed:`, (error as Error).message);
-        await this.failStepResult(stepResult, testCaseRunId, testSuiteRunId, results, error as Error);
+        await this.failStepResult(page, stepResult, testCaseRunId, testSuiteRunId, results, error as Error);
       }
     }
   }
@@ -545,6 +545,20 @@ class ExecutionService {
     this.popContext();
   }
 
+  private shouldCaptureScreenshot(stmtType: string): boolean {
+    // Only capture screenshots for commands that interact with the page
+    const screenshotCommands = [
+      'ClickStmt',
+      'TypeStmt', 
+      'GoStmt',
+      'WaitStmt',
+      'ExpectStmt',
+      'CallStmt' // Function calls might interact with page
+    ];
+    
+    return screenshotCommands.includes(stmtType);
+  }
+
   private async completeStepResult(
     page: Page,
     stepResult: TestStepResult,
@@ -552,7 +566,12 @@ class ExecutionService {
     testSuiteRunId: string,
     results: TestStepResult[]
   ): Promise<void> {
-    const screenshotUrl = await this.captureScreenshot(page, stepResult.stepNumber, testCaseRunId);
+    let screenshotUrl: string | undefined;
+    
+    // Only capture screenshot for commands that need documentation
+    if (this.shouldCaptureScreenshot(stepResult.stmtType)) {
+      screenshotUrl = await this.captureScreenshot(page, stepResult.stepNumber, testCaseRunId);
+    }
     
     stepResult.status = TestStepStatus.PASSED;
     stepResult.completedAt = new Date();
@@ -574,19 +593,29 @@ class ExecutionService {
   }
 
   private async failStepResult(
+    page: Page,
     stepResult: TestStepResult,
     testCaseRunId: string,
     testSuiteRunId: string,
     results: TestStepResult[],
     error: Error
   ): Promise<void> {
+    let screenshotUrl: string | undefined;
+    
+    // Capture screenshot for failed steps that would normally have screenshots
+    if (this.shouldCaptureScreenshot(stepResult.stmtType)) {
+      screenshotUrl = await this.captureScreenshot(page, stepResult.stepNumber, testCaseRunId);
+    }
+    
     stepResult.status = TestStepStatus.FAILED;
     stepResult.completedAt = new Date();
     stepResult.duration = stepResult.completedAt.getTime() - stepResult.startedAt.getTime();
     stepResult.errorMessage = error.message;
+    stepResult.screenshot = screenshotUrl;
 
     await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, stepResult.stepNumber, {
-      error: error.message
+      error: error.message,
+      screenshotUrl
     });
 
     results.push(stepResult);

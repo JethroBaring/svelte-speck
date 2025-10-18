@@ -170,20 +170,22 @@ class WebsocketService {
   async notifyTestStepStarted(
     testCaseRunId: string,
     testSuiteRunId: string,
-    stepNumber: number
+    stepResult: any
   ): Promise<void> {
+    console.log('🔌 Websocket service received stepResult:', JSON.stringify(stepResult, null, 2));
+    
     // Publish directly to Redis instead of API endpoint
     const event = {
       type: "test-step-started",
       testSuiteRunId,
       testCaseRunId,
       data: {
-        stepNumber,
-        status: "RUNNING",
+        testStep: stepResult,
       },
       timestamp: new Date().toISOString(),
     };
 
+    console.log('📡 Publishing event to Redis:', JSON.stringify(event, null, 2));
     await this.redis.publish("test-step-events", JSON.stringify(event));
   }
 

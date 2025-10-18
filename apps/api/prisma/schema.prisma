@@ -300,6 +300,7 @@ model TestStepResult {
   errorMessage  String?        @map("error_message")
   screenshot    String?
   logs          String?        @db.Text
+  isLastStep    Boolean        @default(false) @map("is_last_step")
 
   // Relations
   testCaseRun TestCaseRun @relation("TestCaseRunSteps", fields: [testCaseRunId], references: [id], onDelete: Cascade)

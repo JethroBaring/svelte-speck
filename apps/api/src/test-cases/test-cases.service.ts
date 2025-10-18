@@ -102,10 +102,69 @@ export class TestCasesService {
       results?: any;
     },
   ) {
-    for (const r of result?.results || []) {
-      await this.prisma.testStepResult.create({
-        data: r,
-      });
+    // Create a map to track temporary IDs to database IDs for parent-child relationships
+    const tempIdToDbId = new Map<string, string>();
+
+    // Helper function to create step results recursively (parents first)
+    const createStepResultsRecursively = async (stepResults: any[]) => {
+      // First, create all root-level steps (those without a parentStepId or parentStepId not in current batch)
+      for (const r of stepResults) {
+        if (!r.parentStepId || !tempIdToDbId.has(r.parentStepId)) {
+          // This is a root step or parent hasn't been created yet
+          const tempId = r.id;
+          const created = await this.prisma.testStepResult.create({
+            data: {
+              testCaseRunId: r.testCaseRunId,
+              stepNumber: r.stepNumber,
+              stepName: r.stepName,
+              stmtType: r.stmtType,
+              contextType: r.contextType,
+              status: r.status,
+              startedAt: r.startedAt,
+              completedAt: r.completedAt,
+              duration: r.duration,
+              errorMessage: r.errorMessage,
+              screenshot: r.screenshot,
+              logs: r.logs,
+              isLastStep: r.isLastStep || false,
+              parentStepId: r.parentStepId && tempIdToDbId.has(r.parentStepId) ? tempIdToDbId.get(r.parentStepId) : null,
+            } as any,
+          });
+          tempIdToDbId.set(tempId, created.id);
+        }
+      }
+
+      // Then, create child steps that now have their parents in the database
+      for (const r of stepResults) {
+        if (r.parentStepId && tempIdToDbId.has(r.parentStepId) && !tempIdToDbId.has(r.id)) {
+          const tempId = r.id;
+          const parentDbId = tempIdToDbId.get(r.parentStepId);
+          const created = await this.prisma.testStepResult.create({
+            data: {
+              testCaseRunId: r.testCaseRunId,
+              stepNumber: r.stepNumber,
+              stepName: r.stepName,
+              stmtType: r.stmtType,
+              contextType: r.contextType,
+              status: r.status,
+              startedAt: r.startedAt,
+              completedAt: r.completedAt,
+              duration: r.duration,
+              errorMessage: r.errorMessage,
+              screenshot: r.screenshot,
+              logs: r.logs,
+              isLastStep: r.isLastStep || false,
+              parentStepId: parentDbId,
+            } as any,
+          });
+          tempIdToDbId.set(tempId, created.id);
+        }
+      }
+    };
+
+    // Create all step results with proper parent-child relationships
+    if (result?.results && Array.isArray(result.results)) {
+      await createStepResultsRecursively(result.results);
     }
 
     // Update test case run

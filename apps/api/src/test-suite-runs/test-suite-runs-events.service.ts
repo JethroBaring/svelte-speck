@@ -182,8 +182,8 @@ export class TestSuiteRunsEventsService implements OnModuleInit {
     const progressData = {
       testSuiteRunId: event.testSuiteRunId,
       testCaseRunId: event.testCaseRunId,
-      status: event.data.status,
-      testStep: {
+      status: event.data.testStep?.status || event.data.status,
+      testStep: event.data.testStep || {
         stepNumber: event.data.stepNumber,
         status: event.data.status,
         error: event.data.error,

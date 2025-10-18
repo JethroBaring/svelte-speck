@@ -42,7 +42,7 @@ export const TestSuiteRunScalarFieldEnumSchema = z.enum(['id','testSuiteId','sta
 
 export const TestCaseRunScalarFieldEnumSchema = z.enum(['id','testCaseId','testSuiteRunId','status','startedAt','completedAt','duration']);
 
-export const TestStepResultScalarFieldEnumSchema = z.enum(['id','testCaseRunId','parentStepId','stepNumber','stepName','stmtType','contextType','status','startedAt','completedAt','duration','errorMessage','screenshot','logs']);
+export const TestStepResultScalarFieldEnumSchema = z.enum(['id','testCaseRunId','parentStepId','stepNumber','stepName','stmtType','contextType','status','startedAt','completedAt','duration','errorMessage','screenshot','logs','isLastStep']);
 
 export const PageScalarFieldEnumSchema = z.enum(['id','projectId','name','url','isProtected','authFunction','createdBy','createdAt','updatedAt']);
 
@@ -361,6 +361,7 @@ export const TestStepResultSchema = z.object({
   errorMessage: z.string().nullable(),
   screenshot: z.string().nullable(),
   logs: z.string().nullable(),
+  isLastStep: z.boolean(),
 })
 
 export type TestStepResult = z.infer<typeof TestStepResultSchema>
@@ -1029,6 +1030,7 @@ export const TestStepResultSelectSchema: z.ZodType<Prisma.TestStepResultSelect> 
   errorMessage: z.boolean().optional(),
   screenshot: z.boolean().optional(),
   logs: z.boolean().optional(),
+  isLastStep: z.boolean().optional(),
   testCaseRun: z.union([z.boolean(),z.lazy(() => TestCaseRunArgsSchema)]).optional(),
   parentStep: z.union([z.boolean(),z.lazy(() => TestStepResultArgsSchema)]).optional(),
   childSteps: z.union([z.boolean(),z.lazy(() => TestStepResultFindManyArgsSchema)]).optional(),
@@ -2473,6 +2475,7 @@ export const TestStepResultWhereInputSchema: z.ZodType<Prisma.TestStepResultWher
   errorMessage: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   screenshot: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isLastStep: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   testCaseRun: z.union([ z.lazy(() => TestCaseRunScalarRelationFilterSchema),z.lazy(() => TestCaseRunWhereInputSchema) ]).optional(),
   parentStep: z.union([ z.lazy(() => TestStepResultNullableScalarRelationFilterSchema),z.lazy(() => TestStepResultWhereInputSchema) ]).optional().nullable(),
   childSteps: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
@@ -2493,6 +2496,7 @@ export const TestStepResultOrderByWithRelationInputSchema: z.ZodType<Prisma.Test
   errorMessage: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   screenshot: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   logs: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isLastStep: z.lazy(() => SortOrderSchema).optional(),
   testCaseRun: z.lazy(() => TestCaseRunOrderByWithRelationInputSchema).optional(),
   parentStep: z.lazy(() => TestStepResultOrderByWithRelationInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultOrderByRelationAggregateInputSchema).optional()
@@ -2519,6 +2523,7 @@ export const TestStepResultWhereUniqueInputSchema: z.ZodType<Prisma.TestStepResu
   errorMessage: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   screenshot: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isLastStep: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   testCaseRun: z.union([ z.lazy(() => TestCaseRunScalarRelationFilterSchema),z.lazy(() => TestCaseRunWhereInputSchema) ]).optional(),
   parentStep: z.union([ z.lazy(() => TestStepResultNullableScalarRelationFilterSchema),z.lazy(() => TestStepResultWhereInputSchema) ]).optional().nullable(),
   childSteps: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
@@ -2539,6 +2544,7 @@ export const TestStepResultOrderByWithAggregationInputSchema: z.ZodType<Prisma.T
   errorMessage: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   screenshot: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   logs: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isLastStep: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => TestStepResultCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => TestStepResultAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => TestStepResultMaxOrderByAggregateInputSchema).optional(),
@@ -2564,6 +2570,7 @@ export const TestStepResultScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   errorMessage: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   screenshot: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  isLastStep: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const PageWhereInputSchema: z.ZodType<Prisma.PageWhereInput> = z.object({
@@ -4207,6 +4214,7 @@ export const TestStepResultCreateInputSchema: z.ZodType<Prisma.TestStepResultCre
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
   parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
@@ -4227,6 +4235,7 @@ export const TestStepResultUncheckedCreateInputSchema: z.ZodType<Prisma.TestStep
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
@@ -4243,6 +4252,7 @@ export const TestStepResultUpdateInputSchema: z.ZodType<Prisma.TestStepResultUpd
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
   parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
@@ -4263,6 +4273,7 @@ export const TestStepResultUncheckedUpdateInputSchema: z.ZodType<Prisma.TestStep
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
@@ -4280,7 +4291,8 @@ export const TestStepResultCreateManyInputSchema: z.ZodType<Prisma.TestStepResul
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional()
 }).strict();
 
 export const TestStepResultUpdateManyMutationInputSchema: z.ZodType<Prisma.TestStepResultUpdateManyMutationInput> = z.object({
@@ -4296,6 +4308,7 @@ export const TestStepResultUpdateManyMutationInputSchema: z.ZodType<Prisma.TestS
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyInput> = z.object({
@@ -4313,6 +4326,7 @@ export const TestStepResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Test
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const PageCreateInputSchema: z.ZodType<Prisma.PageCreateInput> = z.object({
@@ -5809,7 +5823,8 @@ export const TestStepResultCountOrderByAggregateInputSchema: z.ZodType<Prisma.Te
   duration: z.lazy(() => SortOrderSchema).optional(),
   errorMessage: z.lazy(() => SortOrderSchema).optional(),
   screenshot: z.lazy(() => SortOrderSchema).optional(),
-  logs: z.lazy(() => SortOrderSchema).optional()
+  logs: z.lazy(() => SortOrderSchema).optional(),
+  isLastStep: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestStepResultAvgOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultAvgOrderByAggregateInput> = z.object({
@@ -5831,7 +5846,8 @@ export const TestStepResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Test
   duration: z.lazy(() => SortOrderSchema).optional(),
   errorMessage: z.lazy(() => SortOrderSchema).optional(),
   screenshot: z.lazy(() => SortOrderSchema).optional(),
-  logs: z.lazy(() => SortOrderSchema).optional()
+  logs: z.lazy(() => SortOrderSchema).optional(),
+  isLastStep: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestStepResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultMinOrderByAggregateInput> = z.object({
@@ -5848,7 +5864,8 @@ export const TestStepResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.Test
   duration: z.lazy(() => SortOrderSchema).optional(),
   errorMessage: z.lazy(() => SortOrderSchema).optional(),
   screenshot: z.lazy(() => SortOrderSchema).optional(),
-  logs: z.lazy(() => SortOrderSchema).optional()
+  logs: z.lazy(() => SortOrderSchema).optional(),
+  isLastStep: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestStepResultSumOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultSumOrderByAggregateInput> = z.object({
@@ -12092,6 +12109,7 @@ export const TestStepResultCreateWithoutTestCaseRunInputSchema: z.ZodType<Prisma
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
@@ -12110,6 +12128,7 @@ export const TestStepResultUncheckedCreateWithoutTestCaseRunInputSchema: z.ZodTy
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
@@ -12225,6 +12244,7 @@ export const TestStepResultScalarWhereInputSchema: z.ZodType<Prisma.TestStepResu
   errorMessage: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   screenshot: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isLastStep: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const TestCaseRunCreateWithoutStepResultsInputSchema: z.ZodType<Prisma.TestCaseRunCreateWithoutStepResultsInput> = z.object({
@@ -12265,6 +12285,7 @@ export const TestStepResultCreateWithoutChildStepsInputSchema: z.ZodType<Prisma.
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
   parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional()
 }).strict();
@@ -12283,7 +12304,8 @@ export const TestStepResultUncheckedCreateWithoutChildStepsInputSchema: z.ZodTyp
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional()
 }).strict();
 
 export const TestStepResultCreateOrConnectWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultCreateOrConnectWithoutChildStepsInput> = z.object({
@@ -12304,6 +12326,7 @@ export const TestStepResultCreateWithoutParentStepInputSchema: z.ZodType<Prisma.
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
   childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
@@ -12322,6 +12345,7 @@ export const TestStepResultUncheckedCreateWithoutParentStepInputSchema: z.ZodTyp
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
@@ -12390,6 +12414,7 @@ export const TestStepResultUpdateWithoutChildStepsInputSchema: z.ZodType<Prisma.
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
   parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional()
 }).strict();
@@ -12409,6 +12434,7 @@ export const TestStepResultUncheckedUpdateWithoutChildStepsInputSchema: z.ZodTyp
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpsertWithWhereUniqueWithoutParentStepInput> = z.object({
@@ -14691,7 +14717,8 @@ export const TestStepResultCreateManyTestCaseRunInputSchema: z.ZodType<Prisma.Te
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional()
 }).strict();
 
 export const TestStepResultUpdateWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultUpdateWithoutTestCaseRunInput> = z.object({
@@ -14707,6 +14734,7 @@ export const TestStepResultUpdateWithoutTestCaseRunInputSchema: z.ZodType<Prisma
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
@@ -14725,6 +14753,7 @@ export const TestStepResultUncheckedUpdateWithoutTestCaseRunInputSchema: z.ZodTy
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
@@ -14742,6 +14771,7 @@ export const TestStepResultUncheckedUpdateManyWithoutTestCaseRunInputSchema: z.Z
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultCreateManyParentStepInputSchema: z.ZodType<Prisma.TestStepResultCreateManyParentStepInput> = z.object({
@@ -14757,7 +14787,8 @@ export const TestStepResultCreateManyParentStepInputSchema: z.ZodType<Prisma.Tes
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  isLastStep: z.boolean().optional()
 }).strict();
 
 export const TestStepResultUpdateWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpdateWithoutParentStepInput> = z.object({
@@ -14773,6 +14804,7 @@ export const TestStepResultUpdateWithoutParentStepInputSchema: z.ZodType<Prisma.
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
   childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
@@ -14791,6 +14823,7 @@ export const TestStepResultUncheckedUpdateWithoutParentStepInputSchema: z.ZodTyp
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
@@ -14808,6 +14841,7 @@ export const TestStepResultUncheckedUpdateManyWithoutParentStepInputSchema: z.Zo
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isLastStep: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const PageElementCreateManyPageInputSchema: z.ZodType<Prisma.PageElementCreateManyPageInput> = z.object({

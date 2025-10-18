@@ -288,7 +288,8 @@ exports.Prisma.TestStepResultScalarFieldEnum = {
   duration: 'duration',
   errorMessage: 'errorMessage',
   screenshot: 'screenshot',
-  logs: 'logs'
+  logs: 'logs',
+  isLastStep: 'isLastStep'
 };
 
 exports.Prisma.PageScalarFieldEnum = {

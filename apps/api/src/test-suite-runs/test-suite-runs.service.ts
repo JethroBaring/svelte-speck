@@ -67,12 +67,11 @@ export class TestSuiteRunsService {
       },
     });
 
-
     const testSuite = await this.prisma.testSuites.findUnique({
       where: { id: testSuiteId },
       select: {
         projectId: true,
-      }
+      },
     });
 
     // Emit suite started event
@@ -142,7 +141,11 @@ export class TestSuiteRunsService {
       // if (testSuite?.setupSteps?.length > 0) {
       //   await this.queueWithSetup(testSuiteRun.id, testCaseRuns, options);
       // } else {
-      await this.queueDirectExecution(testSuiteRun.id, testCaseRuns, testSuite?.projectId!);
+      await this.queueDirectExecution(
+        testSuiteRun.id,
+        testCaseRuns,
+        testSuite?.projectId!,
+      );
       // }
 
       return {
@@ -284,7 +287,10 @@ export class TestSuiteRunsService {
     }
 
     for (const testSuiteFunction of testSuiteFunctions) {
-      testSuiteFunctionsHash.set(testSuiteFunction.name, testSuiteFunction.code);
+      testSuiteFunctionsHash.set(
+        testSuiteFunction.name,
+        testSuiteFunction.code,
+      );
     }
 
     const testCaseJobs = await Promise.all(
@@ -571,9 +577,16 @@ export class TestSuiteRunsService {
       include: {
         testCaseRuns: {
           include: {
-            stepResults: true,
+            stepResults: {
+              where: {
+                parentStepId: null,
+              },
+              include: {
+                childSteps: true,
+              },
+            },
           },
-        }
+        },
       },
     });
   }

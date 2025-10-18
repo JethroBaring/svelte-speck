@@ -20948,6 +20948,7 @@ export namespace Prisma {
     errorMessage: string | null
     screenshot: string | null
     logs: string | null
+    isLastStep: boolean | null
   }
 
   export type TestStepResultMaxAggregateOutputType = {
@@ -20965,6 +20966,7 @@ export namespace Prisma {
     errorMessage: string | null
     screenshot: string | null
     logs: string | null
+    isLastStep: boolean | null
   }
 
   export type TestStepResultCountAggregateOutputType = {
@@ -20982,6 +20984,7 @@ export namespace Prisma {
     errorMessage: number
     screenshot: number
     logs: number
+    isLastStep: number
     _all: number
   }
 
@@ -21011,6 +21014,7 @@ export namespace Prisma {
     errorMessage?: true
     screenshot?: true
     logs?: true
+    isLastStep?: true
   }
 
   export type TestStepResultMaxAggregateInputType = {
@@ -21028,6 +21032,7 @@ export namespace Prisma {
     errorMessage?: true
     screenshot?: true
     logs?: true
+    isLastStep?: true
   }
 
   export type TestStepResultCountAggregateInputType = {
@@ -21045,6 +21050,7 @@ export namespace Prisma {
     errorMessage?: true
     screenshot?: true
     logs?: true
+    isLastStep?: true
     _all?: true
   }
 
@@ -21149,6 +21155,7 @@ export namespace Prisma {
     errorMessage: string | null
     screenshot: string | null
     logs: string | null
+    isLastStep: boolean
     _count: TestStepResultCountAggregateOutputType | null
     _avg: TestStepResultAvgAggregateOutputType | null
     _sum: TestStepResultSumAggregateOutputType | null
@@ -21185,6 +21192,7 @@ export namespace Prisma {
     errorMessage?: boolean
     screenshot?: boolean
     logs?: boolean
+    isLastStep?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
     parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
     childSteps?: boolean | TestStepResult$childStepsArgs<ExtArgs>
@@ -21206,6 +21214,7 @@ export namespace Prisma {
     errorMessage?: boolean
     screenshot?: boolean
     logs?: boolean
+    isLastStep?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
     parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }, ExtArgs["result"]["testStepResult"]>
@@ -21225,6 +21234,7 @@ export namespace Prisma {
     errorMessage?: boolean
     screenshot?: boolean
     logs?: boolean
+    isLastStep?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
     parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }, ExtArgs["result"]["testStepResult"]>
@@ -21244,9 +21254,10 @@ export namespace Prisma {
     errorMessage?: boolean
     screenshot?: boolean
     logs?: boolean
+    isLastStep?: boolean
   }
 
-  export type TestStepResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseRunId" | "parentStepId" | "stepNumber" | "stepName" | "stmtType" | "contextType" | "status" | "startedAt" | "completedAt" | "duration" | "errorMessage" | "screenshot" | "logs", ExtArgs["result"]["testStepResult"]>
+  export type TestStepResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseRunId" | "parentStepId" | "stepNumber" | "stepName" | "stmtType" | "contextType" | "status" | "startedAt" | "completedAt" | "duration" | "errorMessage" | "screenshot" | "logs" | "isLastStep", ExtArgs["result"]["testStepResult"]>
   export type TestStepResultInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
     parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
@@ -21284,6 +21295,7 @@ export namespace Prisma {
       errorMessage: string | null
       screenshot: string | null
       logs: string | null
+      isLastStep: boolean
     }, ExtArgs["result"]["testStepResult"]>
     composites: {}
   }
@@ -21724,6 +21736,7 @@ export namespace Prisma {
     readonly errorMessage: FieldRef<"TestStepResult", 'String'>
     readonly screenshot: FieldRef<"TestStepResult", 'String'>
     readonly logs: FieldRef<"TestStepResult", 'String'>
+    readonly isLastStep: FieldRef<"TestStepResult", 'Boolean'>
   }
     
 
@@ -29166,7 +29179,8 @@ export namespace Prisma {
     duration: 'duration',
     errorMessage: 'errorMessage',
     screenshot: 'screenshot',
-    logs: 'logs'
+    logs: 'logs',
+    isLastStep: 'isLastStep'
   };
 
   export type TestStepResultScalarFieldEnum = (typeof TestStepResultScalarFieldEnum)[keyof typeof TestStepResultScalarFieldEnum]
@@ -30586,6 +30600,7 @@ export namespace Prisma {
     errorMessage?: StringNullableFilter<"TestStepResult"> | string | null
     screenshot?: StringNullableFilter<"TestStepResult"> | string | null
     logs?: StringNullableFilter<"TestStepResult"> | string | null
+    isLastStep?: BoolFilter<"TestStepResult"> | boolean
     testCaseRun?: XOR<TestCaseRunScalarRelationFilter, TestCaseRunWhereInput>
     parentStep?: XOR<TestStepResultNullableScalarRelationFilter, TestStepResultWhereInput> | null
     childSteps?: TestStepResultListRelationFilter
@@ -30606,6 +30621,7 @@ export namespace Prisma {
     errorMessage?: SortOrderInput | SortOrder
     screenshot?: SortOrderInput | SortOrder
     logs?: SortOrderInput | SortOrder
+    isLastStep?: SortOrder
     testCaseRun?: TestCaseRunOrderByWithRelationInput
     parentStep?: TestStepResultOrderByWithRelationInput
     childSteps?: TestStepResultOrderByRelationAggregateInput
@@ -30629,6 +30645,7 @@ export namespace Prisma {
     errorMessage?: StringNullableFilter<"TestStepResult"> | string | null
     screenshot?: StringNullableFilter<"TestStepResult"> | string | null
     logs?: StringNullableFilter<"TestStepResult"> | string | null
+    isLastStep?: BoolFilter<"TestStepResult"> | boolean
     testCaseRun?: XOR<TestCaseRunScalarRelationFilter, TestCaseRunWhereInput>
     parentStep?: XOR<TestStepResultNullableScalarRelationFilter, TestStepResultWhereInput> | null
     childSteps?: TestStepResultListRelationFilter
@@ -30649,6 +30666,7 @@ export namespace Prisma {
     errorMessage?: SortOrderInput | SortOrder
     screenshot?: SortOrderInput | SortOrder
     logs?: SortOrderInput | SortOrder
+    isLastStep?: SortOrder
     _count?: TestStepResultCountOrderByAggregateInput
     _avg?: TestStepResultAvgOrderByAggregateInput
     _max?: TestStepResultMaxOrderByAggregateInput
@@ -30674,6 +30692,7 @@ export namespace Prisma {
     errorMessage?: StringNullableWithAggregatesFilter<"TestStepResult"> | string | null
     screenshot?: StringNullableWithAggregatesFilter<"TestStepResult"> | string | null
     logs?: StringNullableWithAggregatesFilter<"TestStepResult"> | string | null
+    isLastStep?: BoolWithAggregatesFilter<"TestStepResult"> | boolean
   }
 
   export type PageWhereInput = {
@@ -32299,6 +32318,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
     parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
     childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
@@ -32319,6 +32339,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
   }
 
@@ -32335,6 +32356,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
     parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
     childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
@@ -32355,6 +32377,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
   }
 
@@ -32373,6 +32396,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
   }
 
   export type TestStepResultUpdateManyMutationInput = {
@@ -32388,6 +32412,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TestStepResultUncheckedUpdateManyInput = {
@@ -32405,6 +32430,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PageCreateInput = {
@@ -33902,6 +33928,7 @@ export namespace Prisma {
     errorMessage?: SortOrder
     screenshot?: SortOrder
     logs?: SortOrder
+    isLastStep?: SortOrder
   }
 
   export type TestStepResultAvgOrderByAggregateInput = {
@@ -33924,6 +33951,7 @@ export namespace Prisma {
     errorMessage?: SortOrder
     screenshot?: SortOrder
     logs?: SortOrder
+    isLastStep?: SortOrder
   }
 
   export type TestStepResultMinOrderByAggregateInput = {
@@ -33941,6 +33969,7 @@ export namespace Prisma {
     errorMessage?: SortOrder
     screenshot?: SortOrder
     logs?: SortOrder
+    isLastStep?: SortOrder
   }
 
   export type TestStepResultSumOrderByAggregateInput = {
@@ -40184,6 +40213,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
     childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
   }
@@ -40202,6 +40232,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
   }
 
@@ -40317,6 +40348,7 @@ export namespace Prisma {
     errorMessage?: StringNullableFilter<"TestStepResult"> | string | null
     screenshot?: StringNullableFilter<"TestStepResult"> | string | null
     logs?: StringNullableFilter<"TestStepResult"> | string | null
+    isLastStep?: BoolFilter<"TestStepResult"> | boolean
   }
 
   export type TestCaseRunCreateWithoutStepResultsInput = {
@@ -40357,6 +40389,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
     parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
   }
@@ -40376,6 +40409,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
   }
 
   export type TestStepResultCreateOrConnectWithoutChildStepsInput = {
@@ -40396,6 +40430,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
     childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
   }
@@ -40414,6 +40449,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
     childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
   }
 
@@ -40482,6 +40518,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
     parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
   }
@@ -40501,6 +40538,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TestStepResultUpsertWithWhereUniqueWithoutParentStepInput = {
@@ -42784,6 +42822,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
   }
 
   export type TestStepResultUpdateWithoutTestCaseRunInput = {
@@ -42799,6 +42838,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
     childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
   }
@@ -42817,6 +42857,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
   }
 
@@ -42834,6 +42875,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TestStepResultCreateManyParentStepInput = {
@@ -42850,6 +42892,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    isLastStep?: boolean
   }
 
   export type TestStepResultUpdateWithoutParentStepInput = {
@@ -42865,6 +42908,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
     childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
   }
@@ -42883,6 +42927,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
     childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
   }
 
@@ -42900,6 +42945,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    isLastStep?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PageElementCreateManyPageInput = {
