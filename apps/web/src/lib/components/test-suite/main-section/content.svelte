@@ -14,6 +14,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { tick } from 'svelte';
 	import { getResourcesStore } from '$lib/stores/ui/resources-store.svelte';
+	import { Scanner, Parser, Interpreter, Environment } from '@repo/interpreter';
+	
 	const testCaseId = $derived(page.url.searchParams.get('testCaseId'));
 	const testCasesStore = getTestCasesStore();
 
@@ -30,6 +32,11 @@
 		() => code,
 		async (value, signal) => {
 			if (!currentEditingId) return;
+			const scanner = new Scanner(code);
+      const tokens = scanner.scanTokens();
+      const parser = new Parser(tokens);
+      const statements = parser.parse();
+			console.log(statements)
 			const payload = { code: value } as unknown as TestCaseUpdateInput;
 			const res = await updateTestCase(currentEditingId, payload, { signal });
 			if (res.data) {

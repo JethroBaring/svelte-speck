@@ -45,6 +45,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"@repo/interpreter": "workspace:*",
 		"@fontsource-variable/outfit": "^5.2.8",
 		"@tanstack/svelte-query": "^6.0.0",
 		"axios": "^1.12.2",

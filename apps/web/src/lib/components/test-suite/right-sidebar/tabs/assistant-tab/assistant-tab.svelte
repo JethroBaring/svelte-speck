@@ -11,6 +11,7 @@
 	const subTabTitle = $derived(
 		activeSubTab === 'chat' ? 'Chat' : activeSubTab === 'history' ? 'History' : 'Settings'
 	);
+	
 </script>
 
 <div class="flex h-full flex-col">
