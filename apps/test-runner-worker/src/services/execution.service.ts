@@ -15,6 +15,15 @@ enum TestStepStatus {
   ERROR = 'ERROR'
 }
 
+enum StepContextType {
+  NONE = 'NONE',
+  LOOP = 'LOOP',
+  FOREACH = 'FOREACH',
+  CONDITIONAL = 'CONDITIONAL',
+  FUNCTION = 'FUNCTION',
+  CALL = 'CALL'
+}
+
 interface JobData {
   code: string;
   setupState?: SetupState;
@@ -34,11 +43,24 @@ interface SetupState {
 }
 
 interface TestStepResult {
-  step: number;
-  command: string;
-  screenshotUrl: string | null;
+  id?: string;
+  testCaseRunId: string;
+  stepNumber: number;
+  stepName?: string;
+  stmtType?: string;
+  lineNumber?: number;
+  parentStepResultId?: string;
+  iteration?: number;
+  contextType: StepContextType;
+  contextName?: string;
+  // metadata?: Record<string, any>;
   status: TestStepStatus;
-  error?: string;
+  startedAt: Date;
+  completedAt?: Date;
+  duration?: number;
+  errorMessage?: string;
+  screenshot?: string;
+  logs?: string;
 }
 
 interface ExecutionResult {
@@ -56,6 +78,8 @@ class ExecutionService {
   private testSuiteFunctionsHash: Map<string, any>;
   private interpreter: Interpreter;
   private environment: Environment;
+  private stepNumber: number;
+  private contextStack: Array<{ type: StepContextType; name?: string; iteration?: number }>;
 
   constructor() {
     this.projectVariablesHash = new Map();
@@ -64,6 +88,8 @@ class ExecutionService {
     this.testSuiteFunctionsHash = new Map();
     this.environment = new Environment();
     this.interpreter = new Interpreter(this.environment, 'execute');
+    this.stepNumber = 0;
+    this.contextStack = [];
   }
 
   async executeTestCase(jobData: JobData): Promise<ExecutionResult> {
@@ -74,6 +100,10 @@ class ExecutionService {
     const results: TestStepResult[] = [];
 
     try {
+      // Reset execution state
+      this.resetStepNumber();
+      this.contextStack = [];
+
       // Parse and validate the DSL code
       const scanner = new Scanner(code);
       const tokens = scanner.scanTokens();
@@ -165,6 +195,93 @@ class ExecutionService {
     });
   }
 
+  private pushContext(type: StepContextType, name?: string, iteration?: number): void {
+    this.contextStack.push({ type, name, iteration });
+  }
+
+  private popContext(): void {
+    this.contextStack.pop();
+  }
+
+  private getCurrentContext(): { type: StepContextType; name?: string; iteration?: number } | null {
+    return this.contextStack.length > 0 ? this.contextStack[this.contextStack.length - 1] : null;
+  }
+
+  private incrementStepNumber(): number {
+    this.stepNumber++;
+    return this.stepNumber;
+  }
+
+  private resetStepNumber(): void {
+    this.stepNumber = 0;
+  }
+
+  private extractStatementMetadata(statement: any): Record<string, any> {
+    const metadata: Record<string, any> = {};
+    
+    if (statement.constructor.name === 'ClickStmt') {
+      metadata.selector = statement.selector;
+    } else if (statement.constructor.name === 'TypeStmt') {
+      metadata.selector = statement.selector;
+      metadata.value = statement.value;
+    } else if (statement.constructor.name === 'GoStmt') {
+      metadata.action = statement.action;
+      metadata.target = statement.target;
+    } else if (statement.constructor.name === 'WaitStmt') {
+      metadata.type = statement.type;
+      metadata.value = statement.value;
+      metadata.selector = statement.selector;
+      metadata.condition = statement.condition;
+    } else if (statement.constructor.name === 'ExpectStmt') {
+      metadata.type = statement.type;
+      metadata.target = statement.target;
+      metadata.operator = statement.operator;
+      metadata.expected = statement.expected || statement.state;
+    } else if (statement.constructor.name === 'CallStmt') {
+      metadata.functionName = statement.functionName;
+      metadata.args = statement.args;
+    } else if (statement.constructor.name === 'SetStmt') {
+      metadata.target = statement.target;
+      metadata.value = statement.value;
+    } else if (statement.constructor.name === 'PrintStmt') {
+      metadata.value = statement.value;
+    } else if (statement.constructor.name === 'RepeatStmt') {
+      metadata.count = statement.count;
+    } else if (statement.constructor.name === 'ForEachStmt') {
+      metadata.variable = statement.variable;
+      metadata.collection = statement.collection;
+    } else if (statement.constructor.name === 'FunctionStmt') {
+      metadata.name = statement.name.lexeme;
+      metadata.parameters = statement.params.map((p: any) => p.name.lexeme);
+    }
+
+    // Add evaluated variables from environment
+    metadata.evaluatedVars = {};
+    this.environment.values.forEach((variable: any, key: string) => {
+      metadata.evaluatedVars[key] = variable.getValue ? variable.getValue() : variable;
+    });
+
+    return metadata;
+  }
+
+  private getStatementContextType(statement: any): StepContextType {
+    const stmtName = statement.constructor.name;
+    
+    if (stmtName === 'RepeatStmt') {
+      return StepContextType.LOOP;
+    } else if (stmtName === 'ForEachStmt') {
+      return StepContextType.FOREACH;
+    } else if (stmtName === 'IfStmt') {
+      return StepContextType.CONDITIONAL;
+    } else if (stmtName === 'FunctionStmt') {
+      return StepContextType.FUNCTION;
+    } else if (stmtName === 'CallStmt') {
+      return StepContextType.CALL;
+    }
+    
+    return StepContextType.NONE;
+  }
+
   private async executeTestCommands(
     page: Page,
     statements: any[],
@@ -174,54 +291,305 @@ class ExecutionService {
   ): Promise<TestStepResult[]> {
     console.log(`📝 Processing ${statements.length} statements`);
 
-    let stepNumber = 1;
+    this.resetStepNumber();
+    this.contextStack = [];
 
+    await this.executeStatementsRecursively(
+      page,
+      statements,
+      testCaseRunId,
+      testSuiteRunId,
+      results
+    );
+
+    return results;
+  }
+
+  private async executeStatementsRecursively(
+    page: Page,
+    statements: any[],
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    parentStepResultId?: string
+  ): Promise<void> {
     for (const statement of statements) {
-      const command = this.getStatementDescription(statement);
-      console.log(`⚡ Step ${stepNumber}: ${command}`);
+      const stepNumber = this.incrementStepNumber();
+      const stmtType = statement.constructor.name;
+      const stepName = this.getStatementDescription(statement);
+      const contextType = this.getStatementContextType(statement);
+      const currentContext = this.getCurrentContext();
+      const metadata = this.extractStatementMetadata(statement);
+
+      console.log(`⚡ Step ${stepNumber}: ${stepName}`);
+
+      const stepResult: TestStepResult = {
+        testCaseRunId,
+        stepNumber,
+        stepName,
+        stmtType,
+        parentStepResultId,
+        iteration: currentContext?.iteration,
+        contextType: currentContext?.type || StepContextType.NONE,
+        contextName: currentContext?.name,
+        // metadata,
+        status: TestStepStatus.RUNNING,
+        startedAt: new Date()
+      };
 
       try {
         await websocketService.notifyTestStepStarted(testCaseRunId, testSuiteRunId, stepNumber);
 
-        // Execute the statement using the interpreter
-        await this.interpreter.execute(statement);
-
-        const screenshotUrl = await this.captureScreenshot(page, stepNumber, testCaseRunId);
-        await websocketService.notifyTestStepCompleted(
-          testCaseRunId,
-          testSuiteRunId,
-          stepNumber,
-          {
-            status: TestStepStatus.PASSED,
-            screenshotUrl
-          },
-          screenshotUrl
-        );
-        results.push({
-          step: stepNumber,
-          command,
-          screenshotUrl,
-          status: TestStepStatus.PASSED
-        });
+        // Handle special control flow statements
+        if (stmtType === 'RepeatStmt') {
+          await this.handleRepeatStatement(page, statement, testCaseRunId, testSuiteRunId, results, stepResult);
+        } else if (stmtType === 'ForEachStmt') {
+          await this.handleForEachStatement(page, statement, testCaseRunId, testSuiteRunId, results, stepResult);
+        } else if (stmtType === 'IfStmt') {
+          await this.handleIfStatement(page, statement, testCaseRunId, testSuiteRunId, results, stepResult);
+        } else if (stmtType === 'FunctionStmt') {
+          await this.handleFunctionStatement(page, statement, testCaseRunId, testSuiteRunId, results, stepResult);
+        } else {
+          // Execute regular statement
+          await this.interpreter.execute(statement);
+          await this.completeStepResult(page, stepResult, testCaseRunId, testSuiteRunId, results);
+        }
       } catch (error) {
         console.error(`❌ Step ${stepNumber} failed:`, (error as Error).message);
-        await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, stepNumber, {
-          error: (error as Error).message
-        });
-        results.push({
-          step: stepNumber,
-          command,
-          screenshotUrl: null,
-          status: TestStepStatus.FAILED,
-          error: (error as Error).message
-        });
-        // Continue executing remaining steps instead of failing fast
+        await this.failStepResult(stepResult, testCaseRunId, testSuiteRunId, results, error as Error);
       }
+    }
+  }
 
-      stepNumber++;
+  private async handleRepeatStatement(
+    page: Page,
+    statement: any,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    parentStepResult: TestStepResult
+  ): Promise<void> {
+    const count = statement.count;
+    const body = statement.body || [];
+    
+    // Complete the repeat statement step
+    parentStepResult.status = TestStepStatus.PASSED;
+    parentStepResult.completedAt = new Date();
+    parentStepResult.duration = parentStepResult.completedAt.getTime() - parentStepResult.startedAt.getTime();
+    results.push(parentStepResult);
+
+    // Push context for the loop
+    this.pushContext(StepContextType.LOOP, `repeat ${count} times`);
+
+    // Execute the body for each iteration
+    for (let i = 1; i <= count; i++) {
+      this.pushContext(StepContextType.LOOP, `repeat ${count} times`, i);
+      await this.executeStatementsRecursively(
+        page,
+        body,
+        testCaseRunId,
+        testSuiteRunId,
+        results,
+        parentStepResult.id
+      );
+      this.popContext();
     }
 
-    return results;
+    this.popContext();
+  }
+
+  private async handleForEachStatement(
+    page: Page,
+    statement: any,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    parentStepResult: TestStepResult
+  ): Promise<void> {
+    const variable = statement.variable;
+    const collection = statement.collection;
+    const body = statement.body || [];
+    
+    // Complete the foreach statement step
+    parentStepResult.status = TestStepStatus.PASSED;
+    parentStepResult.completedAt = new Date();
+    parentStepResult.duration = parentStepResult.completedAt.getTime() - parentStepResult.startedAt.getTime();
+    results.push(parentStepResult);
+
+    // Push context for the foreach
+    this.pushContext(StepContextType.FOREACH, `for each ${variable} in ${collection}`);
+
+    // Get the collection value from environment
+    const collectionValue = this.environment.get(collection);
+    if (Array.isArray(collectionValue)) {
+      // Execute the body for each item
+      for (let i = 0; i < collectionValue.length; i++) {
+        const item = collectionValue[i];
+        // Set the variable in the environment
+        this.environment.assign(variable, item);
+        
+        this.pushContext(StepContextType.FOREACH, `for each ${variable} in ${collection}`, i + 1);
+        await this.executeStatementsRecursively(
+          page,
+          body,
+          testCaseRunId,
+          testSuiteRunId,
+          results,
+          parentStepResult.id
+        );
+        this.popContext();
+      }
+    }
+
+    this.popContext();
+  }
+
+  private async handleIfStatement(
+    page: Page,
+    statement: any,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    parentStepResult: TestStepResult
+  ): Promise<void> {
+    const condition = statement.condition;
+    const thenBranch = statement.thenBranch || [];
+    const elseBranch = statement.elseBranch || [];
+    const elseIfConditions = statement.elseIfConditions || [];
+    const elseIfBranches = statement.elseIfBranches || [];
+    
+    // Complete the if statement step
+    parentStepResult.status = TestStepStatus.PASSED;
+    parentStepResult.completedAt = new Date();
+    parentStepResult.duration = parentStepResult.completedAt.getTime() - parentStepResult.startedAt.getTime();
+    results.push(parentStepResult);
+
+    // Push context for the conditional
+    this.pushContext(StepContextType.CONDITIONAL, 'if statement');
+
+    try {
+      // Evaluate the condition
+      const conditionResult = this.interpreter.evaluate(condition);
+      
+      if (conditionResult) {
+        await this.executeStatementsRecursively(
+          page,
+          thenBranch,
+          testCaseRunId,
+          testSuiteRunId,
+          results,
+          parentStepResult.id
+        );
+      } else {
+        // Check else-if conditions
+        let executed = false;
+        for (let i = 0; i < elseIfConditions.length; i++) {
+          const elseIfCondition = this.interpreter.evaluate(elseIfConditions[i]);
+          if (elseIfCondition) {
+            await this.executeStatementsRecursively(
+              page,
+              elseIfBranches[i],
+              testCaseRunId,
+              testSuiteRunId,
+              results,
+              parentStepResult.id
+            );
+            executed = true;
+            break;
+          }
+        }
+        
+        // Execute else branch if no else-if was executed
+        if (!executed && elseBranch.length > 0) {
+          await this.executeStatementsRecursively(
+            page,
+            elseBranch,
+            testCaseRunId,
+            testSuiteRunId,
+            results,
+            parentStepResult.id
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error evaluating if condition:', (error as Error).message);
+    }
+
+    this.popContext();
+  }
+
+  private async handleFunctionStatement(
+    page: Page,
+    statement: any,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    parentStepResult: TestStepResult
+  ): Promise<void> {
+    const name = statement.name.lexeme;
+    const params = statement.params || [];
+    const body = statement.body || [];
+    
+    // Complete the function statement step
+    parentStepResult.status = TestStepStatus.PASSED;
+    parentStepResult.completedAt = new Date();
+    parentStepResult.duration = parentStepResult.completedAt.getTime() - parentStepResult.startedAt.getTime();
+    results.push(parentStepResult);
+
+    // Push context for the function
+    this.pushContext(StepContextType.FUNCTION, `function ${name}`);
+
+    // Register the function in the environment (let the interpreter handle this)
+    await this.interpreter.execute(statement);
+
+    this.popContext();
+  }
+
+  private async completeStepResult(
+    page: Page,
+    stepResult: TestStepResult,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[]
+  ): Promise<void> {
+    const screenshotUrl = await this.captureScreenshot(page, stepResult.stepNumber, testCaseRunId);
+    
+    stepResult.status = TestStepStatus.PASSED;
+    stepResult.completedAt = new Date();
+    stepResult.duration = stepResult.completedAt.getTime() - stepResult.startedAt.getTime();
+    stepResult.screenshot = screenshotUrl;
+
+    await websocketService.notifyTestStepCompleted(
+      testCaseRunId,
+      testSuiteRunId,
+      stepResult.stepNumber,
+      {
+        status: TestStepStatus.PASSED,
+        screenshotUrl
+      },
+      screenshotUrl
+    );
+
+    results.push(stepResult);
+  }
+
+  private async failStepResult(
+    stepResult: TestStepResult,
+    testCaseRunId: string,
+    testSuiteRunId: string,
+    results: TestStepResult[],
+    error: Error
+  ): Promise<void> {
+    stepResult.status = TestStepStatus.FAILED;
+    stepResult.completedAt = new Date();
+    stepResult.duration = stepResult.completedAt.getTime() - stepResult.startedAt.getTime();
+    stepResult.errorMessage = error.message;
+
+    await websocketService.notifyTestStepCompleted(testCaseRunId, testSuiteRunId, stepResult.stepNumber, {
+      error: error.message
+    });
+
+    results.push(stepResult);
   }
 
   private getStatementDescription(statement: any): string {

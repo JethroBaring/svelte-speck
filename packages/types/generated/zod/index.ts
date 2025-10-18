@@ -42,7 +42,7 @@ export const TestSuiteRunScalarFieldEnumSchema = z.enum(['id','testSuiteId','sta
 
 export const TestCaseRunScalarFieldEnumSchema = z.enum(['id','testCaseId','testSuiteRunId','status','startedAt','completedAt','duration']);
 
-export const TestStepResultScalarFieldEnumSchema = z.enum(['id','testCaseRunId','stepNumber','stepName','status','startedAt','completedAt','duration','errorMessage','screenshot','logs']);
+export const TestStepResultScalarFieldEnumSchema = z.enum(['id','testCaseRunId','parentStepId','stepNumber','stepName','stmtType','contextType','status','startedAt','completedAt','duration','errorMessage','screenshot','logs']);
 
 export const PageScalarFieldEnumSchema = z.enum(['id','projectId','name','url','isProtected','authFunction','createdBy','createdAt','updatedAt']);
 
@@ -61,6 +61,10 @@ export const SortOrderSchema = z.enum(['asc','desc']);
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
 export const NullsOrderSchema = z.enum(['first','last']);
+
+export const StepContextTypeSchema = z.enum(['NONE','LOOP','FOREACH','CONDITIONAL','FUNCTION','CALL']);
+
+export type StepContextTypeType = `${z.infer<typeof StepContextTypeSchema>}`
 
 export const NotificationTypeSchema = z.enum(['PROJECT_INVITATION','PROJECT_MEMBER_JOINED','ROLE_CHANGED','TEST_SUITE_COMPLETED','FEATURE_UPDATE']);
 
@@ -346,8 +350,11 @@ export const TestStepResultSchema = z.object({
   status: TestStepStatusSchema,
   id: z.string().uuid(),
   testCaseRunId: z.string(),
+  parentStepId: z.string().nullable(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().nullable(),
   startedAt: z.coerce.date(),
   completedAt: z.coerce.date().nullable(),
   duration: z.number().int().nullable(),
@@ -989,6 +996,9 @@ export const TestCaseRunSelectSchema: z.ZodType<Prisma.TestCaseRunSelect> = z.ob
 
 export const TestStepResultIncludeSchema: z.ZodType<Prisma.TestStepResultInclude> = z.object({
   testCaseRun: z.union([z.boolean(),z.lazy(() => TestCaseRunArgsSchema)]).optional(),
+  parentStep: z.union([z.boolean(),z.lazy(() => TestStepResultArgsSchema)]).optional(),
+  childSteps: z.union([z.boolean(),z.lazy(() => TestStepResultFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => TestStepResultCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 export const TestStepResultArgsSchema: z.ZodType<Prisma.TestStepResultDefaultArgs> = z.object({
@@ -996,11 +1006,22 @@ export const TestStepResultArgsSchema: z.ZodType<Prisma.TestStepResultDefaultArg
   include: z.lazy(() => TestStepResultIncludeSchema).optional(),
 }).strict();
 
+export const TestStepResultCountOutputTypeArgsSchema: z.ZodType<Prisma.TestStepResultCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => TestStepResultCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const TestStepResultCountOutputTypeSelectSchema: z.ZodType<Prisma.TestStepResultCountOutputTypeSelect> = z.object({
+  childSteps: z.boolean().optional(),
+}).strict();
+
 export const TestStepResultSelectSchema: z.ZodType<Prisma.TestStepResultSelect> = z.object({
   id: z.boolean().optional(),
   testCaseRunId: z.boolean().optional(),
+  parentStepId: z.boolean().optional(),
   stepNumber: z.boolean().optional(),
   stepName: z.boolean().optional(),
+  stmtType: z.boolean().optional(),
+  contextType: z.boolean().optional(),
   status: z.boolean().optional(),
   startedAt: z.boolean().optional(),
   completedAt: z.boolean().optional(),
@@ -1009,6 +1030,9 @@ export const TestStepResultSelectSchema: z.ZodType<Prisma.TestStepResultSelect> 
   screenshot: z.boolean().optional(),
   logs: z.boolean().optional(),
   testCaseRun: z.union([z.boolean(),z.lazy(() => TestCaseRunArgsSchema)]).optional(),
+  parentStep: z.union([z.boolean(),z.lazy(() => TestStepResultArgsSchema)]).optional(),
+  childSteps: z.union([z.boolean(),z.lazy(() => TestStepResultFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => TestStepResultCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 // PAGE
@@ -2437,8 +2461,11 @@ export const TestStepResultWhereInputSchema: z.ZodType<Prisma.TestStepResultWher
   NOT: z.union([ z.lazy(() => TestStepResultWhereInputSchema),z.lazy(() => TestStepResultWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testCaseRunId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  parentStepId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   stepNumber: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   stepName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  stmtType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  contextType: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumTestStepStatusFilterSchema),z.lazy(() => TestStepStatusSchema) ]).optional(),
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -2447,13 +2474,18 @@ export const TestStepResultWhereInputSchema: z.ZodType<Prisma.TestStepResultWher
   screenshot: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   testCaseRun: z.union([ z.lazy(() => TestCaseRunScalarRelationFilterSchema),z.lazy(() => TestCaseRunWhereInputSchema) ]).optional(),
+  parentStep: z.union([ z.lazy(() => TestStepResultNullableScalarRelationFilterSchema),z.lazy(() => TestStepResultWhereInputSchema) ]).optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
 }).strict();
 
 export const TestStepResultOrderByWithRelationInputSchema: z.ZodType<Prisma.TestStepResultOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   testCaseRunId: z.lazy(() => SortOrderSchema).optional(),
+  parentStepId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   stepNumber: z.lazy(() => SortOrderSchema).optional(),
   stepName: z.lazy(() => SortOrderSchema).optional(),
+  stmtType: z.lazy(() => SortOrderSchema).optional(),
+  contextType: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2461,7 +2493,9 @@ export const TestStepResultOrderByWithRelationInputSchema: z.ZodType<Prisma.Test
   errorMessage: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   screenshot: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   logs: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  testCaseRun: z.lazy(() => TestCaseRunOrderByWithRelationInputSchema).optional()
+  testCaseRun: z.lazy(() => TestCaseRunOrderByWithRelationInputSchema).optional(),
+  parentStep: z.lazy(() => TestStepResultOrderByWithRelationInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const TestStepResultWhereUniqueInputSchema: z.ZodType<Prisma.TestStepResultWhereUniqueInput> = z.object({
@@ -2473,8 +2507,11 @@ export const TestStepResultWhereUniqueInputSchema: z.ZodType<Prisma.TestStepResu
   OR: z.lazy(() => TestStepResultWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => TestStepResultWhereInputSchema),z.lazy(() => TestStepResultWhereInputSchema).array() ]).optional(),
   testCaseRunId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  parentStepId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   stepNumber: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   stepName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  stmtType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  contextType: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumTestStepStatusFilterSchema),z.lazy(() => TestStepStatusSchema) ]).optional(),
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -2483,13 +2520,18 @@ export const TestStepResultWhereUniqueInputSchema: z.ZodType<Prisma.TestStepResu
   screenshot: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   logs: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   testCaseRun: z.union([ z.lazy(() => TestCaseRunScalarRelationFilterSchema),z.lazy(() => TestCaseRunWhereInputSchema) ]).optional(),
+  parentStep: z.union([ z.lazy(() => TestStepResultNullableScalarRelationFilterSchema),z.lazy(() => TestStepResultWhereInputSchema) ]).optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
 }).strict());
 
 export const TestStepResultOrderByWithAggregationInputSchema: z.ZodType<Prisma.TestStepResultOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   testCaseRunId: z.lazy(() => SortOrderSchema).optional(),
+  parentStepId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   stepNumber: z.lazy(() => SortOrderSchema).optional(),
   stepName: z.lazy(() => SortOrderSchema).optional(),
+  stmtType: z.lazy(() => SortOrderSchema).optional(),
+  contextType: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2510,8 +2552,11 @@ export const TestStepResultScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   NOT: z.union([ z.lazy(() => TestStepResultScalarWhereWithAggregatesInputSchema),z.lazy(() => TestStepResultScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   testCaseRunId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  parentStepId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   stepNumber: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   stepName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  stmtType: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  contextType: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumTestStepStatusWithAggregatesFilterSchema),z.lazy(() => TestStepStatusSchema) ]).optional(),
   startedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -4153,6 +4198,8 @@ export const TestStepResultCreateInputSchema: z.ZodType<Prisma.TestStepResultCre
   id: z.string().uuid().optional(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
@@ -4160,27 +4207,35 @@ export const TestStepResultCreateInputSchema: z.ZodType<Prisma.TestStepResultCre
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
   logs: z.string().optional().nullable(),
-  testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema)
+  testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
+  parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
 export const TestStepResultUncheckedCreateInputSchema: z.ZodType<Prisma.TestStepResultUncheckedCreateInput> = z.object({
   id: z.string().uuid().optional(),
   testCaseRunId: z.string(),
+  parentStepId: z.string().optional().nullable(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
 export const TestStepResultUpdateInputSchema: z.ZodType<Prisma.TestStepResultUpdateInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4188,14 +4243,19 @@ export const TestStepResultUpdateInputSchema: z.ZodType<Prisma.TestStepResultUpd
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional()
+  testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
+  parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
 export const TestStepResultUncheckedUpdateInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testCaseRunId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  parentStepId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4203,13 +4263,17 @@ export const TestStepResultUncheckedUpdateInputSchema: z.ZodType<Prisma.TestStep
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
 export const TestStepResultCreateManyInputSchema: z.ZodType<Prisma.TestStepResultCreateManyInput> = z.object({
   id: z.string().uuid().optional(),
   testCaseRunId: z.string(),
+  parentStepId: z.string().optional().nullable(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
@@ -4223,6 +4287,8 @@ export const TestStepResultUpdateManyMutationInputSchema: z.ZodType<Prisma.TestS
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4235,8 +4301,11 @@ export const TestStepResultUpdateManyMutationInputSchema: z.ZodType<Prisma.TestS
 export const TestStepResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testCaseRunId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  parentStepId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -5721,11 +5790,19 @@ export const TestCaseRunScalarRelationFilterSchema: z.ZodType<Prisma.TestCaseRun
   isNot: z.lazy(() => TestCaseRunWhereInputSchema).optional()
 }).strict();
 
+export const TestStepResultNullableScalarRelationFilterSchema: z.ZodType<Prisma.TestStepResultNullableScalarRelationFilter> = z.object({
+  is: z.lazy(() => TestStepResultWhereInputSchema).optional().nullable(),
+  isNot: z.lazy(() => TestStepResultWhereInputSchema).optional().nullable()
+}).strict();
+
 export const TestStepResultCountOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   testCaseRunId: z.lazy(() => SortOrderSchema).optional(),
+  parentStepId: z.lazy(() => SortOrderSchema).optional(),
   stepNumber: z.lazy(() => SortOrderSchema).optional(),
   stepName: z.lazy(() => SortOrderSchema).optional(),
+  stmtType: z.lazy(() => SortOrderSchema).optional(),
+  contextType: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
@@ -5743,8 +5820,11 @@ export const TestStepResultAvgOrderByAggregateInputSchema: z.ZodType<Prisma.Test
 export const TestStepResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   testCaseRunId: z.lazy(() => SortOrderSchema).optional(),
+  parentStepId: z.lazy(() => SortOrderSchema).optional(),
   stepNumber: z.lazy(() => SortOrderSchema).optional(),
   stepName: z.lazy(() => SortOrderSchema).optional(),
+  stmtType: z.lazy(() => SortOrderSchema).optional(),
+  contextType: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
@@ -5757,8 +5837,11 @@ export const TestStepResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Test
 export const TestStepResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestStepResultMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   testCaseRunId: z.lazy(() => SortOrderSchema).optional(),
+  parentStepId: z.lazy(() => SortOrderSchema).optional(),
   stepNumber: z.lazy(() => SortOrderSchema).optional(),
   stepName: z.lazy(() => SortOrderSchema).optional(),
+  stmtType: z.lazy(() => SortOrderSchema).optional(),
+  contextType: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
@@ -7732,6 +7815,26 @@ export const TestCaseRunCreateNestedOneWithoutStepResultsInputSchema: z.ZodType<
   connect: z.lazy(() => TestCaseRunWhereUniqueInputSchema).optional()
 }).strict();
 
+export const TestStepResultCreateNestedOneWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultCreateNestedOneWithoutChildStepsInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutChildStepsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TestStepResultCreateOrConnectWithoutChildStepsInputSchema).optional(),
+  connect: z.lazy(() => TestStepResultWhereUniqueInputSchema).optional()
+}).strict();
+
+export const TestStepResultCreateNestedManyWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultCreateNestedManyWithoutParentStepInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema).array(),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => TestStepResultCreateManyParentStepInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUncheckedCreateNestedManyWithoutParentStepInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema).array(),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => TestStepResultCreateManyParentStepInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const EnumTestStepStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumTestStepStatusFieldUpdateOperationsInput> = z.object({
   set: z.lazy(() => TestStepStatusSchema).optional()
 }).strict();
@@ -7742,6 +7845,44 @@ export const TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema: z.
   upsert: z.lazy(() => TestCaseRunUpsertWithoutStepResultsInputSchema).optional(),
   connect: z.lazy(() => TestCaseRunWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => TestCaseRunUpdateToOneWithWhereWithoutStepResultsInputSchema),z.lazy(() => TestCaseRunUpdateWithoutStepResultsInputSchema),z.lazy(() => TestCaseRunUncheckedUpdateWithoutStepResultsInputSchema) ]).optional(),
+}).strict();
+
+export const TestStepResultUpdateOneWithoutChildStepsNestedInputSchema: z.ZodType<Prisma.TestStepResultUpdateOneWithoutChildStepsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutChildStepsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TestStepResultCreateOrConnectWithoutChildStepsInputSchema).optional(),
+  upsert: z.lazy(() => TestStepResultUpsertWithoutChildStepsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => TestStepResultWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => TestStepResultWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => TestStepResultWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => TestStepResultUpdateToOneWithWhereWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUpdateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedUpdateWithoutChildStepsInputSchema) ]).optional(),
+}).strict();
+
+export const TestStepResultUpdateManyWithoutParentStepNestedInputSchema: z.ZodType<Prisma.TestStepResultUpdateManyWithoutParentStepNestedInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema).array(),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => TestStepResultCreateManyParentStepInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => TestStepResultUpdateWithWhereUniqueWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpdateWithWhereUniqueWithoutParentStepInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => TestStepResultUpdateManyWithWhereWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpdateManyWithWhereWithoutParentStepInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => TestStepResultScalarWhereInputSchema),z.lazy(() => TestStepResultScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput> = z.object({
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema).array(),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema),z.lazy(() => TestStepResultCreateOrConnectWithoutParentStepInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => TestStepResultCreateManyParentStepInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => TestStepResultWhereUniqueInputSchema),z.lazy(() => TestStepResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => TestStepResultUpdateWithWhereUniqueWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpdateWithWhereUniqueWithoutParentStepInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => TestStepResultUpdateManyWithWhereWithoutParentStepInputSchema),z.lazy(() => TestStepResultUpdateManyWithWhereWithoutParentStepInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => TestStepResultScalarWhereInputSchema),z.lazy(() => TestStepResultScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const ProjectCreateNestedOneWithoutPagesInputSchema: z.ZodType<Prisma.ProjectCreateNestedOneWithoutPagesInput> = z.object({
@@ -11942,26 +12083,34 @@ export const TestStepResultCreateWithoutTestCaseRunInputSchema: z.ZodType<Prisma
   id: z.string().uuid().optional(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
 export const TestStepResultUncheckedCreateWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultUncheckedCreateWithoutTestCaseRunInput> = z.object({
   id: z.string().uuid().optional(),
+  parentStepId: z.string().optional().nullable(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   screenshot: z.string().optional().nullable(),
-  logs: z.string().optional().nullable()
+  logs: z.string().optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
 }).strict();
 
 export const TestStepResultCreateOrConnectWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultCreateOrConnectWithoutTestCaseRunInput> = z.object({
@@ -12064,8 +12213,11 @@ export const TestStepResultScalarWhereInputSchema: z.ZodType<Prisma.TestStepResu
   NOT: z.union([ z.lazy(() => TestStepResultScalarWhereInputSchema),z.lazy(() => TestStepResultScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testCaseRunId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  parentStepId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   stepNumber: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   stepName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  stmtType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  contextType: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumTestStepStatusFilterSchema),z.lazy(() => TestStepStatusSchema) ]).optional(),
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -12100,6 +12252,89 @@ export const TestCaseRunCreateOrConnectWithoutStepResultsInputSchema: z.ZodType<
   create: z.union([ z.lazy(() => TestCaseRunCreateWithoutStepResultsInputSchema),z.lazy(() => TestCaseRunUncheckedCreateWithoutStepResultsInputSchema) ]),
 }).strict();
 
+export const TestStepResultCreateWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultCreateWithoutChildStepsInput> = z.object({
+  id: z.string().uuid().optional(),
+  stepNumber: z.number().int(),
+  stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
+  status: z.lazy(() => TestStepStatusSchema).optional(),
+  startedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  errorMessage: z.string().optional().nullable(),
+  screenshot: z.string().optional().nullable(),
+  logs: z.string().optional().nullable(),
+  testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
+  parentStep: z.lazy(() => TestStepResultCreateNestedOneWithoutChildStepsInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedCreateWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUncheckedCreateWithoutChildStepsInput> = z.object({
+  id: z.string().uuid().optional(),
+  testCaseRunId: z.string(),
+  parentStepId: z.string().optional().nullable(),
+  stepNumber: z.number().int(),
+  stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
+  status: z.lazy(() => TestStepStatusSchema).optional(),
+  startedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  errorMessage: z.string().optional().nullable(),
+  screenshot: z.string().optional().nullable(),
+  logs: z.string().optional().nullable()
+}).strict();
+
+export const TestStepResultCreateOrConnectWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultCreateOrConnectWithoutChildStepsInput> = z.object({
+  where: z.lazy(() => TestStepResultWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutChildStepsInputSchema) ]),
+}).strict();
+
+export const TestStepResultCreateWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultCreateWithoutParentStepInput> = z.object({
+  id: z.string().uuid().optional(),
+  stepNumber: z.number().int(),
+  stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
+  status: z.lazy(() => TestStepStatusSchema).optional(),
+  startedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  errorMessage: z.string().optional().nullable(),
+  screenshot: z.string().optional().nullable(),
+  logs: z.string().optional().nullable(),
+  testCaseRun: z.lazy(() => TestCaseRunCreateNestedOneWithoutStepResultsInputSchema),
+  childSteps: z.lazy(() => TestStepResultCreateNestedManyWithoutParentStepInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedCreateWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUncheckedCreateWithoutParentStepInput> = z.object({
+  id: z.string().uuid().optional(),
+  testCaseRunId: z.string(),
+  stepNumber: z.number().int(),
+  stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
+  status: z.lazy(() => TestStepStatusSchema).optional(),
+  startedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  errorMessage: z.string().optional().nullable(),
+  screenshot: z.string().optional().nullable(),
+  logs: z.string().optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutParentStepInputSchema).optional()
+}).strict();
+
+export const TestStepResultCreateOrConnectWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultCreateOrConnectWithoutParentStepInput> = z.object({
+  where: z.lazy(() => TestStepResultWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema) ]),
+}).strict();
+
+export const TestStepResultCreateManyParentStepInputEnvelopeSchema: z.ZodType<Prisma.TestStepResultCreateManyParentStepInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => TestStepResultCreateManyParentStepInputSchema),z.lazy(() => TestStepResultCreateManyParentStepInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
 export const TestCaseRunUpsertWithoutStepResultsInputSchema: z.ZodType<Prisma.TestCaseRunUpsertWithoutStepResultsInput> = z.object({
   update: z.union([ z.lazy(() => TestCaseRunUpdateWithoutStepResultsInputSchema),z.lazy(() => TestCaseRunUncheckedUpdateWithoutStepResultsInputSchema) ]),
   create: z.union([ z.lazy(() => TestCaseRunCreateWithoutStepResultsInputSchema),z.lazy(() => TestCaseRunUncheckedCreateWithoutStepResultsInputSchema) ]),
@@ -12129,6 +12364,67 @@ export const TestCaseRunUncheckedUpdateWithoutStepResultsInputSchema: z.ZodType<
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const TestStepResultUpsertWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUpsertWithoutChildStepsInput> = z.object({
+  update: z.union([ z.lazy(() => TestStepResultUpdateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedUpdateWithoutChildStepsInputSchema) ]),
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutChildStepsInputSchema) ]),
+  where: z.lazy(() => TestStepResultWhereInputSchema).optional()
+}).strict();
+
+export const TestStepResultUpdateToOneWithWhereWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUpdateToOneWithWhereWithoutChildStepsInput> = z.object({
+  where: z.lazy(() => TestStepResultWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => TestStepResultUpdateWithoutChildStepsInputSchema),z.lazy(() => TestStepResultUncheckedUpdateWithoutChildStepsInputSchema) ]),
+}).strict();
+
+export const TestStepResultUpdateWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUpdateWithoutChildStepsInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
+  parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedUpdateWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateWithoutChildStepsInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testCaseRunId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  parentStepId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const TestStepResultUpsertWithWhereUniqueWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpsertWithWhereUniqueWithoutParentStepInput> = z.object({
+  where: z.lazy(() => TestStepResultWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => TestStepResultUpdateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedUpdateWithoutParentStepInputSchema) ]),
+  create: z.union([ z.lazy(() => TestStepResultCreateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedCreateWithoutParentStepInputSchema) ]),
+}).strict();
+
+export const TestStepResultUpdateWithWhereUniqueWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpdateWithWhereUniqueWithoutParentStepInput> = z.object({
+  where: z.lazy(() => TestStepResultWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => TestStepResultUpdateWithoutParentStepInputSchema),z.lazy(() => TestStepResultUncheckedUpdateWithoutParentStepInputSchema) ]),
+}).strict();
+
+export const TestStepResultUpdateManyWithWhereWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpdateManyWithWhereWithoutParentStepInput> = z.object({
+  where: z.lazy(() => TestStepResultScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => TestStepResultUpdateManyMutationInputSchema),z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepInputSchema) ]),
 }).strict();
 
 export const ProjectCreateWithoutPagesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPagesInput> = z.object({
@@ -14384,8 +14680,11 @@ export const TestCaseRunUncheckedUpdateManyWithoutTestSuiteRunInputSchema: z.Zod
 
 export const TestStepResultCreateManyTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultCreateManyTestCaseRunInput> = z.object({
   id: z.string().uuid().optional(),
+  parentStepId: z.string().optional().nullable(),
   stepNumber: z.number().int(),
   stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
   status: z.lazy(() => TestStepStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
@@ -14399,6 +14698,8 @@ export const TestStepResultUpdateWithoutTestCaseRunInputSchema: z.ZodType<Prisma
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -14406,12 +14707,34 @@ export const TestStepResultUpdateWithoutTestCaseRunInputSchema: z.ZodType<Prisma
   errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  parentStep: z.lazy(() => TestStepResultUpdateOneWithoutChildStepsNestedInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
 }).strict();
 
 export const TestStepResultUncheckedUpdateWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateWithoutTestCaseRunInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  parentStepId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedUpdateManyWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyWithoutTestCaseRunInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  parentStepId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -14421,10 +14744,63 @@ export const TestStepResultUncheckedUpdateWithoutTestCaseRunInputSchema: z.ZodTy
   logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const TestStepResultUncheckedUpdateManyWithoutTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyWithoutTestCaseRunInput> = z.object({
+export const TestStepResultCreateManyParentStepInputSchema: z.ZodType<Prisma.TestStepResultCreateManyParentStepInput> = z.object({
+  id: z.string().uuid().optional(),
+  testCaseRunId: z.string(),
+  stepNumber: z.number().int(),
+  stepName: z.string(),
+  stmtType: z.string(),
+  contextType: z.string().optional().nullable(),
+  status: z.lazy(() => TestStepStatusSchema).optional(),
+  startedAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  duration: z.number().int().optional().nullable(),
+  errorMessage: z.string().optional().nullable(),
+  screenshot: z.string().optional().nullable(),
+  logs: z.string().optional().nullable()
+}).strict();
+
+export const TestStepResultUpdateWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUpdateWithoutParentStepInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  testCaseRun: z.lazy(() => TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInputSchema).optional(),
+  childSteps: z.lazy(() => TestStepResultUpdateManyWithoutParentStepNestedInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedUpdateWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateWithoutParentStepInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testCaseRunId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  errorMessage: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  screenshot: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  logs: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  childSteps: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutParentStepNestedInputSchema).optional()
+}).strict();
+
+export const TestStepResultUncheckedUpdateManyWithoutParentStepInputSchema: z.ZodType<Prisma.TestStepResultUncheckedUpdateManyWithoutParentStepInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testCaseRunId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stepNumber: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  stepName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  stmtType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  contextType: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => TestStepStatusSchema),z.lazy(() => EnumTestStepStatusFieldUpdateOperationsInputSchema) ]).optional(),
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),

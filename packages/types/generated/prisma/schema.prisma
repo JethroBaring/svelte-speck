@@ -180,7 +180,7 @@ model ProjectVariable {
   projectId String   @map("project_id")
   name      String // Variable name (without @ symbol)
   value     String // Selector or value
-  type      String // 'string' or 'number' or 'boolean'
+  type      String // 'String' or 'Number' or 'Boolean'
   createdBy String?  @map("created_by")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -199,7 +199,7 @@ model TestSuiteVariable {
   testSuiteId String   @map("test_suite_id")
   name        String // Variable name (without @ symbol)
   value       String // Selector or value
-  type        String // 'string' or 'number' or 'boolean'
+  type        String // 'String' or 'Number' or 'Boolean'
   createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -288,18 +288,24 @@ model TestCaseRun {
 model TestStepResult {
   id            String         @id @default(uuid())
   testCaseRunId String         @map("test_case_run_id")
-  stepNumber    Int            @map("step_number") // Which step in the sequence (1, 2, 3...)
-  stepName      String         @map("step_name") // Human-readable step description
+  parentStepId  String?        @map("parent_step_id") // <— NEW: for hierarchical structure
+  stepNumber    Int            @map("step_number")
+  stepName      String         @map("step_name")
+  stmtType      String         @map("stmt_type") // e.g. ClickStmt, IfStmt, RepeatStmt, etc.
+  contextType   String?        @map("context_type") // e.g. CONDITIONAL, LOOP, FUNCTION
   status        TestStepStatus @default(RUNNING)
   startedAt     DateTime       @default(now()) @map("started_at")
   completedAt   DateTime?      @map("completed_at")
-  duration      Int? // Duration in milliseconds
+  duration      Int?
   errorMessage  String?        @map("error_message")
-  screenshot    String? // URL or path to screenshot for this specific step
-  logs          String?        @db.Text // Step-specific logs
+  screenshot    String?
+  logs          String?        @db.Text
 
   // Relations
   testCaseRun TestCaseRun @relation("TestCaseRunSteps", fields: [testCaseRunId], references: [id], onDelete: Cascade)
+
+  parentStep TestStepResult?  @relation("ChildSteps", fields: [parentStepId], references: [id], onDelete: Cascade)
+  childSteps TestStepResult[] @relation("ChildSteps")
 
   @@map("test_step_results")
 }
@@ -396,6 +402,15 @@ model WorkspaceInvitation {
   updatedAt   DateTime                @updatedAt @map("updated_at")
 
   @@map("workspace_invitations")
+}
+
+enum StepContextType {
+  NONE // simple step
+  LOOP // repeat / loop
+  FOREACH // for-each
+  CONDITIONAL // if / else
+  FUNCTION // function definition or call context
+  CALL // call site (separate from FUNCTION if you want)
 }
 
 enum NotificationType {

@@ -31,7 +31,7 @@
 	);
 </script>
 
-<Card.Root onclick={getUrl}>
+<!-- <Card.Root onclick={getUrl}>
 	<Card.Content>
 		<Collapsible.Root class="flex flex-col gap-4 text-sm">
 			<Collapsible.Trigger onclick={(e) => e.stopPropagation()}>
@@ -86,4 +86,4 @@
 			</Collapsible.Content>
 		</Collapsible.Root>
 	</Card.Content>
-</Card.Root>
+</Card.Root> -->

@@ -79,6 +79,7 @@ export class Scanner {
     this.keywords.set("appear", TokenType.APPEAR);
     this.keywords.set("disappear", TokenType.DISAPPEAR);
     this.keywords.set("load", TokenType.LOAD);
+    this.keywords.set("refresh", TokenType.REFRESH);
   }
 
   scanTokens(): Token[] {

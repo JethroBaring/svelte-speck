@@ -149,6 +149,10 @@ export class Parser {
       return this.setStatement();
     }
 
+    if (this.match(TokenType.REFRESH)) {
+      return this.refreshStatement();
+    }
+
     return this.expressionStatement();
   }
 
@@ -167,10 +171,12 @@ export class Parser {
       throw this.error(this.previous(), "Expected 'to', 'back', or 'forward' after 'go' command.");
     }
 
-    return new GoStmt(
+    const stmt = new GoStmt(
       action.lexeme as "to" | "back" | "forward",
       target ?? undefined
     );
+    (stmt as any).stmtType = 'GoStmt';
+    return stmt;
   }
 
   clickStatement() {
@@ -191,30 +197,38 @@ export class Parser {
 
     selector = this.expression();
 
-    return new ClickStmt(
+    const stmt = new ClickStmt(
       selector!,
       modifier as "nth" | "last" | "all",
       value! as number
     );
+    (stmt as any).stmtType = 'ClickStmt';
+    return stmt;
   }
 
   hoverStatement() {
     this.consume(TokenType.OVER, "Expected 'over' after 'hover' command.");
     const selector = this.expression();
-    return new HoverStmt(selector);
+    const stmt = new HoverStmt(selector);
+    (stmt as any).stmtType = 'HoverStmt';
+    return stmt;
   }
 
   pressStatement() {
     let key = this.expression();
 
-    return new PressStmt(key);
+    const stmt = new PressStmt(key);
+    (stmt as any).stmtType = 'PressStmt';
+    return stmt;
   }
 
   checkboxStatement() {
     const action = this.previous().lexeme;
     const selector = this.expression();
 
-    return new CheckboxStmt(action as "check" | "uncheck", selector);
+    const stmt = new CheckboxStmt(action as "check" | "uncheck", selector);
+    (stmt as any).stmtType = 'CheckboxStmt';
+    return stmt;
   }
 
   selectStatement() {
@@ -222,21 +236,27 @@ export class Parser {
     this.consume(TokenType.FROM, "Expected 'from' after select value.");
     let selector = this.expression();
 
-    return new SelectStmt(value, selector);
+    const stmt = new SelectStmt(value, selector);
+    (stmt as any).stmtType = 'SelectStmt';
+    return stmt;
   }
 
   getStatement() {}
 
   refreshStatement() {
     this.consume(TokenType.PAGE, "Expected 'page' after 'refresh' command.");
-    return new RefreshStmt();
+    const stmt = new RefreshStmt();
+    (stmt as any).stmtType = 'RefreshStmt';
+    return stmt;
   }
 
   typeStatement() {
     let value = this.expression();
     this.consume(TokenType.INTO, "Expected 'into' after type value.");
     let selector = this.expression();
-    return new TypeStmt(value, selector);
+    const stmt = new TypeStmt(value, selector);
+    (stmt as any).stmtType = 'TypeStmt';
+    return stmt;
   }
 
   expectStatement() {
@@ -246,11 +266,15 @@ export class Parser {
       this.consume(TokenType.TO, "Expected 'to' after 'title' in expect statement.");
       if (this.match(TokenType.BE)) {
         const expected = this.expression();
-        return new ExpectStmt("page title", null, "to be", expected);
+        const stmt = new ExpectStmt("page title", null, "to be", expected);
+        (stmt as any).stmtType = 'ExpectStmt';
+        return stmt;
       }
       if (this.match(TokenType.CONTAIN)) {
         const expected = this.expression();
-        return new ExpectStmt("page title", null, "to contain", expected);
+        const stmt = new ExpectStmt("page title", null, "to contain", expected);
+        (stmt as any).stmtType = 'ExpectStmt';
+        return stmt;
       }
       throw this.error(this.previous(), "Expected 'be' or 'contain' after 'to' in page title expectation.");
     }
@@ -260,11 +284,15 @@ export class Parser {
       this.consume(TokenType.TO, "Expected 'to' after 'url' in expect statement.");
       if (this.match(TokenType.CONTAIN)) {
         const expected = this.expression();
-        return new ExpectStmt("url", null, "to contain", expected);
+        const stmt = new ExpectStmt("url", null, "to contain", expected);
+        (stmt as any).stmtType = 'ExpectStmt';
+        return stmt;
       }
       if (this.match(TokenType.BE)) {
         const expected = this.expression();
-        return new ExpectStmt("url", null, "to be", expected);
+        const stmt = new ExpectStmt("url", null, "to be", expected);
+        (stmt as any).stmtType = 'ExpectStmt';
+        return stmt;
       }
       throw this.error(this.previous(), "Expected 'contain' or 'be' after 'to' in URL expectation.");
     }
@@ -287,20 +315,26 @@ export class Parser {
           | "enabled"
           | "disabled"
           | "checked";
-        return new ExpectStmt("element", selector, "to be", state);
+        const stmt = new ExpectStmt("element", selector, "to be", state);
+        (stmt as any).stmtType = 'ExpectStmt';
+        return stmt;
       }
       throw this.error(this.previous(), "Expected a visibility state (visible, hidden, enabled, disabled, checked) after 'be'.");
     }
 
     if (this.match(TokenType.CONTAIN)) {
       const expected = this.expression();
-      return new ExpectStmt("element", selector, "to contain", expected);
+      const stmt = new ExpectStmt("element", selector, "to contain", expected);
+      (stmt as any).stmtType = 'ExpectStmt';
+      return stmt;
     }
 
     if (this.match(TokenType.HAVE)) {
       this.consume(TokenType.TEXT, "Expected 'text' after 'have' in expect statement.");
       const expected = this.expression();
-      return new ExpectStmt("element", selector, "to have text", expected);
+      const stmt = new ExpectStmt("element", selector, "to have text", expected);
+      (stmt as any).stmtType = 'ExpectStmt';
+      return stmt;
     }
 
     throw this.error(this.previous(), "Invalid expect statement. Expected 'page title', 'url', or element selector.");
@@ -315,7 +349,9 @@ export class Parser {
     if (this.match(TokenType.PAGE)) {
       this.consume(TokenType.TO, "Expected 'to' after 'page' in wait statement.");
       this.consume(TokenType.LOAD, "Expected 'load' after 'to' in wait statement.");
-      return new WaitStmt("page");
+      const stmt = new WaitStmt("page");
+      (stmt as any).stmtType = 'WaitStmt';
+      return stmt;
     }
 
     // wait for "selector" to appear/disappear
@@ -328,11 +364,15 @@ export class Parser {
         : this.match(TokenType.DISAPPEAR)
         ? "disappear"
         : this.error(this.previous(), "Expected 'appear' or 'disappear' after 'to' in wait statement.");
-      return new WaitStmt("element", expr, condition);
+      const stmt = new WaitStmt("element", expr, condition);
+      (stmt as any).stmtType = 'WaitStmt';
+      return stmt;
     }
 
     if (this.match(TokenType.SECOND, TokenType.SECONDS)) {
-      return new WaitStmt("time", expr);
+      const stmt = new WaitStmt("time", expr);
+      (stmt as any).stmtType = 'WaitStmt';
+      return stmt;
     }
 
     throw this.error(this.previous(), "Expected 'to' (for element conditions) or 'second'/'seconds' (for time) after wait expression.");
@@ -342,12 +382,16 @@ export class Parser {
     let target = this.consume(TokenType.IDENTIFIER, "Expected variable name after 'set' command.");
     this.consume(TokenType.TO, "Expected 'to' after variable name in set statement.");
     let value = this.expression();
-    return new SetStmt(target.lexeme, value);
+    const stmt = new SetStmt(target.lexeme, value);
+    (stmt as any).stmtType = 'SetStmt';
+    return stmt;
   }
 
   expressionStatement() {
     const expr: Expr = this.expression();
-    return new ExpressionStmt(expr);
+    const stmt = new ExpressionStmt(expr);
+    (stmt as any).stmtType = 'ExpressionStmt';
+    return stmt;
   }
 
   expression(): Expr {
@@ -356,7 +400,9 @@ export class Parser {
 
   printStatement() {
     const value = this.or();
-    return new PrintStmt(value);
+    const stmt = new PrintStmt(value);
+    (stmt as any).stmtType = 'PrintStmt';
+    return stmt;
   }
 
   private assignment(): Expr {
@@ -557,7 +603,9 @@ export class Parser {
 
     this.consume(TokenType.END, "Expected 'end' to close if statement.");
 
-    return new IfStmt(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
+    const stmt = new IfStmt(condition, thenBranch, elseIfConditions, elseIfBranches, elseBranch);
+    (stmt as any).stmtType = 'IfStmt';
+    return stmt;
   }
 
   ifCondition(): Expr {
@@ -628,12 +676,14 @@ export class Parser {
     
     this.consume(TokenType.END, "Expected 'end' to close function definition.");
     
-    return new FunctionStmt(
+    const stmt = new FunctionStmt(
       name,
       params,
       body,
       new Token(TokenType.IDENTIFIER, "void", null, 0) // Return type
     );
+    (stmt as any).stmtType = 'FunctionStmt';
+    return stmt;
   }
 
   callStatement(): Stmt {
@@ -647,7 +697,9 @@ export class Parser {
       } while (this.match(TokenType.COMMA));
     }
     
-    return new CallStmt(functionName.lexeme, args);
+    const stmt = new CallStmt(functionName.lexeme, args);
+    (stmt as any).stmtType = 'CallStmt';
+    return stmt;
   }
 
   forEachStatement(): Stmt {
@@ -663,7 +715,9 @@ export class Parser {
     
     this.consume(TokenType.END, "Expected 'end' to close for-each loop.");
     
-    return new ForEachStmt(variable.lexeme, collection, body);
+    const stmt = new ForEachStmt(variable.lexeme, collection, body);
+    (stmt as any).stmtType = 'ForEachStmt';
+    return stmt;
   }
 
   repeatStatement(): Stmt {
@@ -684,6 +738,8 @@ export class Parser {
     
     this.consume(TokenType.END, "Expected 'end' to close repeat loop.");
     
-    return new RepeatStmt(count, body);
+    const stmt = new RepeatStmt(count, body);
+    (stmt as any).stmtType = 'RepeatStmt';
+    return stmt;
   }
 }

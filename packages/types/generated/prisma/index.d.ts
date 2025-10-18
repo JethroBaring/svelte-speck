@@ -128,7 +128,19 @@ export type WorkspaceInvitation = $Result.DefaultSelection<Prisma.$WorkspaceInvi
  * Enums
  */
 export namespace $Enums {
-  export const NotificationType: {
+  export const StepContextType: {
+  NONE: 'NONE',
+  LOOP: 'LOOP',
+  FOREACH: 'FOREACH',
+  CONDITIONAL: 'CONDITIONAL',
+  FUNCTION: 'FUNCTION',
+  CALL: 'CALL'
+};
+
+export type StepContextType = (typeof StepContextType)[keyof typeof StepContextType]
+
+
+export const NotificationType: {
   PROJECT_INVITATION: 'PROJECT_INVITATION',
   PROJECT_MEMBER_JOINED: 'PROJECT_MEMBER_JOINED',
   ROLE_CHANGED: 'ROLE_CHANGED',
@@ -204,6 +216,10 @@ export const Permission: {
 export type Permission = (typeof Permission)[keyof typeof Permission]
 
 }
+
+export type StepContextType = $Enums.StepContextType
+
+export const StepContextType: typeof $Enums.StepContextType
 
 export type NotificationType = $Enums.NotificationType
 
@@ -3357,6 +3373,37 @@ export namespace Prisma {
    * TestCaseRunCountOutputType without action
    */
   export type TestCaseRunCountOutputTypeCountStepResultsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestStepResultWhereInput
+  }
+
+
+  /**
+   * Count Type TestStepResultCountOutputType
+   */
+
+  export type TestStepResultCountOutputType = {
+    childSteps: number
+  }
+
+  export type TestStepResultCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    childSteps?: boolean | TestStepResultCountOutputTypeCountChildStepsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TestStepResultCountOutputType without action
+   */
+  export type TestStepResultCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestStepResultCountOutputType
+     */
+    select?: TestStepResultCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TestStepResultCountOutputType without action
+   */
+  export type TestStepResultCountOutputTypeCountChildStepsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TestStepResultWhereInput
   }
 
@@ -20889,8 +20936,11 @@ export namespace Prisma {
   export type TestStepResultMinAggregateOutputType = {
     id: string | null
     testCaseRunId: string | null
+    parentStepId: string | null
     stepNumber: number | null
     stepName: string | null
+    stmtType: string | null
+    contextType: string | null
     status: $Enums.TestStepStatus | null
     startedAt: Date | null
     completedAt: Date | null
@@ -20903,8 +20953,11 @@ export namespace Prisma {
   export type TestStepResultMaxAggregateOutputType = {
     id: string | null
     testCaseRunId: string | null
+    parentStepId: string | null
     stepNumber: number | null
     stepName: string | null
+    stmtType: string | null
+    contextType: string | null
     status: $Enums.TestStepStatus | null
     startedAt: Date | null
     completedAt: Date | null
@@ -20917,8 +20970,11 @@ export namespace Prisma {
   export type TestStepResultCountAggregateOutputType = {
     id: number
     testCaseRunId: number
+    parentStepId: number
     stepNumber: number
     stepName: number
+    stmtType: number
+    contextType: number
     status: number
     startedAt: number
     completedAt: number
@@ -20943,8 +20999,11 @@ export namespace Prisma {
   export type TestStepResultMinAggregateInputType = {
     id?: true
     testCaseRunId?: true
+    parentStepId?: true
     stepNumber?: true
     stepName?: true
+    stmtType?: true
+    contextType?: true
     status?: true
     startedAt?: true
     completedAt?: true
@@ -20957,8 +21016,11 @@ export namespace Prisma {
   export type TestStepResultMaxAggregateInputType = {
     id?: true
     testCaseRunId?: true
+    parentStepId?: true
     stepNumber?: true
     stepName?: true
+    stmtType?: true
+    contextType?: true
     status?: true
     startedAt?: true
     completedAt?: true
@@ -20971,8 +21033,11 @@ export namespace Prisma {
   export type TestStepResultCountAggregateInputType = {
     id?: true
     testCaseRunId?: true
+    parentStepId?: true
     stepNumber?: true
     stepName?: true
+    stmtType?: true
+    contextType?: true
     status?: true
     startedAt?: true
     completedAt?: true
@@ -21072,8 +21137,11 @@ export namespace Prisma {
   export type TestStepResultGroupByOutputType = {
     id: string
     testCaseRunId: string
+    parentStepId: string | null
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType: string | null
     status: $Enums.TestStepStatus
     startedAt: Date
     completedAt: Date | null
@@ -21105,8 +21173,11 @@ export namespace Prisma {
   export type TestStepResultSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     testCaseRunId?: boolean
+    parentStepId?: boolean
     stepNumber?: boolean
     stepName?: boolean
+    stmtType?: boolean
+    contextType?: boolean
     status?: boolean
     startedAt?: boolean
     completedAt?: boolean
@@ -21115,13 +21186,19 @@ export namespace Prisma {
     screenshot?: boolean
     logs?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
+    childSteps?: boolean | TestStepResult$childStepsArgs<ExtArgs>
+    _count?: boolean | TestStepResultCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["testStepResult"]>
 
   export type TestStepResultSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     testCaseRunId?: boolean
+    parentStepId?: boolean
     stepNumber?: boolean
     stepName?: boolean
+    stmtType?: boolean
+    contextType?: boolean
     status?: boolean
     startedAt?: boolean
     completedAt?: boolean
@@ -21130,13 +21207,17 @@ export namespace Prisma {
     screenshot?: boolean
     logs?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }, ExtArgs["result"]["testStepResult"]>
 
   export type TestStepResultSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     testCaseRunId?: boolean
+    parentStepId?: boolean
     stepNumber?: boolean
     stepName?: boolean
+    stmtType?: boolean
+    contextType?: boolean
     status?: boolean
     startedAt?: boolean
     completedAt?: boolean
@@ -21145,13 +21226,17 @@ export namespace Prisma {
     screenshot?: boolean
     logs?: boolean
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }, ExtArgs["result"]["testStepResult"]>
 
   export type TestStepResultSelectScalar = {
     id?: boolean
     testCaseRunId?: boolean
+    parentStepId?: boolean
     stepNumber?: boolean
     stepName?: boolean
+    stmtType?: boolean
+    contextType?: boolean
     status?: boolean
     startedAt?: boolean
     completedAt?: boolean
@@ -21161,27 +21246,37 @@ export namespace Prisma {
     logs?: boolean
   }
 
-  export type TestStepResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseRunId" | "stepNumber" | "stepName" | "status" | "startedAt" | "completedAt" | "duration" | "errorMessage" | "screenshot" | "logs", ExtArgs["result"]["testStepResult"]>
+  export type TestStepResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseRunId" | "parentStepId" | "stepNumber" | "stepName" | "stmtType" | "contextType" | "status" | "startedAt" | "completedAt" | "duration" | "errorMessage" | "screenshot" | "logs", ExtArgs["result"]["testStepResult"]>
   export type TestStepResultInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
+    childSteps?: boolean | TestStepResult$childStepsArgs<ExtArgs>
+    _count?: boolean | TestStepResultCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TestStepResultIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }
   export type TestStepResultIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     testCaseRun?: boolean | TestCaseRunDefaultArgs<ExtArgs>
+    parentStep?: boolean | TestStepResult$parentStepArgs<ExtArgs>
   }
 
   export type $TestStepResultPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TestStepResult"
     objects: {
       testCaseRun: Prisma.$TestCaseRunPayload<ExtArgs>
+      parentStep: Prisma.$TestStepResultPayload<ExtArgs> | null
+      childSteps: Prisma.$TestStepResultPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       testCaseRunId: string
+      parentStepId: string | null
       stepNumber: number
       stepName: string
+      stmtType: string
+      contextType: string | null
       status: $Enums.TestStepStatus
       startedAt: Date
       completedAt: Date | null
@@ -21584,6 +21679,8 @@ export namespace Prisma {
   export interface Prisma__TestStepResultClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     testCaseRun<T extends TestCaseRunDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TestCaseRunDefaultArgs<ExtArgs>>): Prisma__TestCaseRunClient<$Result.GetResult<Prisma.$TestCaseRunPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    parentStep<T extends TestStepResult$parentStepArgs<ExtArgs> = {}>(args?: Subset<T, TestStepResult$parentStepArgs<ExtArgs>>): Prisma__TestStepResultClient<$Result.GetResult<Prisma.$TestStepResultPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    childSteps<T extends TestStepResult$childStepsArgs<ExtArgs> = {}>(args?: Subset<T, TestStepResult$childStepsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestStepResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -21615,8 +21712,11 @@ export namespace Prisma {
   interface TestStepResultFieldRefs {
     readonly id: FieldRef<"TestStepResult", 'String'>
     readonly testCaseRunId: FieldRef<"TestStepResult", 'String'>
+    readonly parentStepId: FieldRef<"TestStepResult", 'String'>
     readonly stepNumber: FieldRef<"TestStepResult", 'Int'>
     readonly stepName: FieldRef<"TestStepResult", 'String'>
+    readonly stmtType: FieldRef<"TestStepResult", 'String'>
+    readonly contextType: FieldRef<"TestStepResult", 'String'>
     readonly status: FieldRef<"TestStepResult", 'TestStepStatus'>
     readonly startedAt: FieldRef<"TestStepResult", 'DateTime'>
     readonly completedAt: FieldRef<"TestStepResult", 'DateTime'>
@@ -22017,6 +22117,49 @@ export namespace Prisma {
      * Limit how many TestStepResults to delete.
      */
     limit?: number
+  }
+
+  /**
+   * TestStepResult.parentStep
+   */
+  export type TestStepResult$parentStepArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestStepResult
+     */
+    select?: TestStepResultSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestStepResult
+     */
+    omit?: TestStepResultOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestStepResultInclude<ExtArgs> | null
+    where?: TestStepResultWhereInput
+  }
+
+  /**
+   * TestStepResult.childSteps
+   */
+  export type TestStepResult$childStepsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TestStepResult
+     */
+    select?: TestStepResultSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TestStepResult
+     */
+    omit?: TestStepResultOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TestStepResultInclude<ExtArgs> | null
+    where?: TestStepResultWhereInput
+    orderBy?: TestStepResultOrderByWithRelationInput | TestStepResultOrderByWithRelationInput[]
+    cursor?: TestStepResultWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TestStepResultScalarFieldEnum | TestStepResultScalarFieldEnum[]
   }
 
   /**
@@ -29012,8 +29155,11 @@ export namespace Prisma {
   export const TestStepResultScalarFieldEnum: {
     id: 'id',
     testCaseRunId: 'testCaseRunId',
+    parentStepId: 'parentStepId',
     stepNumber: 'stepNumber',
     stepName: 'stepName',
+    stmtType: 'stmtType',
+    contextType: 'contextType',
     status: 'status',
     startedAt: 'startedAt',
     completedAt: 'completedAt',
@@ -30428,8 +30574,11 @@ export namespace Prisma {
     NOT?: TestStepResultWhereInput | TestStepResultWhereInput[]
     id?: StringFilter<"TestStepResult"> | string
     testCaseRunId?: StringFilter<"TestStepResult"> | string
+    parentStepId?: StringNullableFilter<"TestStepResult"> | string | null
     stepNumber?: IntFilter<"TestStepResult"> | number
     stepName?: StringFilter<"TestStepResult"> | string
+    stmtType?: StringFilter<"TestStepResult"> | string
+    contextType?: StringNullableFilter<"TestStepResult"> | string | null
     status?: EnumTestStepStatusFilter<"TestStepResult"> | $Enums.TestStepStatus
     startedAt?: DateTimeFilter<"TestStepResult"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestStepResult"> | Date | string | null
@@ -30438,13 +30587,18 @@ export namespace Prisma {
     screenshot?: StringNullableFilter<"TestStepResult"> | string | null
     logs?: StringNullableFilter<"TestStepResult"> | string | null
     testCaseRun?: XOR<TestCaseRunScalarRelationFilter, TestCaseRunWhereInput>
+    parentStep?: XOR<TestStepResultNullableScalarRelationFilter, TestStepResultWhereInput> | null
+    childSteps?: TestStepResultListRelationFilter
   }
 
   export type TestStepResultOrderByWithRelationInput = {
     id?: SortOrder
     testCaseRunId?: SortOrder
+    parentStepId?: SortOrderInput | SortOrder
     stepNumber?: SortOrder
     stepName?: SortOrder
+    stmtType?: SortOrder
+    contextType?: SortOrderInput | SortOrder
     status?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrderInput | SortOrder
@@ -30453,6 +30607,8 @@ export namespace Prisma {
     screenshot?: SortOrderInput | SortOrder
     logs?: SortOrderInput | SortOrder
     testCaseRun?: TestCaseRunOrderByWithRelationInput
+    parentStep?: TestStepResultOrderByWithRelationInput
+    childSteps?: TestStepResultOrderByRelationAggregateInput
   }
 
   export type TestStepResultWhereUniqueInput = Prisma.AtLeast<{
@@ -30461,8 +30617,11 @@ export namespace Prisma {
     OR?: TestStepResultWhereInput[]
     NOT?: TestStepResultWhereInput | TestStepResultWhereInput[]
     testCaseRunId?: StringFilter<"TestStepResult"> | string
+    parentStepId?: StringNullableFilter<"TestStepResult"> | string | null
     stepNumber?: IntFilter<"TestStepResult"> | number
     stepName?: StringFilter<"TestStepResult"> | string
+    stmtType?: StringFilter<"TestStepResult"> | string
+    contextType?: StringNullableFilter<"TestStepResult"> | string | null
     status?: EnumTestStepStatusFilter<"TestStepResult"> | $Enums.TestStepStatus
     startedAt?: DateTimeFilter<"TestStepResult"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestStepResult"> | Date | string | null
@@ -30471,13 +30630,18 @@ export namespace Prisma {
     screenshot?: StringNullableFilter<"TestStepResult"> | string | null
     logs?: StringNullableFilter<"TestStepResult"> | string | null
     testCaseRun?: XOR<TestCaseRunScalarRelationFilter, TestCaseRunWhereInput>
+    parentStep?: XOR<TestStepResultNullableScalarRelationFilter, TestStepResultWhereInput> | null
+    childSteps?: TestStepResultListRelationFilter
   }, "id">
 
   export type TestStepResultOrderByWithAggregationInput = {
     id?: SortOrder
     testCaseRunId?: SortOrder
+    parentStepId?: SortOrderInput | SortOrder
     stepNumber?: SortOrder
     stepName?: SortOrder
+    stmtType?: SortOrder
+    contextType?: SortOrderInput | SortOrder
     status?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrderInput | SortOrder
@@ -30498,8 +30662,11 @@ export namespace Prisma {
     NOT?: TestStepResultScalarWhereWithAggregatesInput | TestStepResultScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"TestStepResult"> | string
     testCaseRunId?: StringWithAggregatesFilter<"TestStepResult"> | string
+    parentStepId?: StringNullableWithAggregatesFilter<"TestStepResult"> | string | null
     stepNumber?: IntWithAggregatesFilter<"TestStepResult"> | number
     stepName?: StringWithAggregatesFilter<"TestStepResult"> | string
+    stmtType?: StringWithAggregatesFilter<"TestStepResult"> | string
+    contextType?: StringNullableWithAggregatesFilter<"TestStepResult"> | string | null
     status?: EnumTestStepStatusWithAggregatesFilter<"TestStepResult"> | $Enums.TestStepStatus
     startedAt?: DateTimeWithAggregatesFilter<"TestStepResult"> | Date | string
     completedAt?: DateTimeNullableWithAggregatesFilter<"TestStepResult"> | Date | string | null
@@ -32123,6 +32290,8 @@ export namespace Prisma {
     id?: string
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -32131,13 +32300,18 @@ export namespace Prisma {
     screenshot?: string | null
     logs?: string | null
     testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
+    parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
+    childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
   }
 
   export type TestStepResultUncheckedCreateInput = {
     id?: string
     testCaseRunId: string
+    parentStepId?: string | null
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -32145,12 +32319,15 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
   }
 
   export type TestStepResultUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32159,13 +32336,18 @@ export namespace Prisma {
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
     testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
+    parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
+    childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
   }
 
   export type TestStepResultUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     testCaseRunId?: StringFieldUpdateOperationsInput | string
+    parentStepId?: NullableStringFieldUpdateOperationsInput | string | null
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32173,13 +32355,17 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
   }
 
   export type TestStepResultCreateManyInput = {
     id?: string
     testCaseRunId: string
+    parentStepId?: string | null
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -32193,6 +32379,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32205,8 +32393,11 @@ export namespace Prisma {
   export type TestStepResultUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     testCaseRunId?: StringFieldUpdateOperationsInput | string
+    parentStepId?: NullableStringFieldUpdateOperationsInput | string | null
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33691,11 +33882,19 @@ export namespace Prisma {
     isNot?: TestCaseRunWhereInput
   }
 
+  export type TestStepResultNullableScalarRelationFilter = {
+    is?: TestStepResultWhereInput | null
+    isNot?: TestStepResultWhereInput | null
+  }
+
   export type TestStepResultCountOrderByAggregateInput = {
     id?: SortOrder
     testCaseRunId?: SortOrder
+    parentStepId?: SortOrder
     stepNumber?: SortOrder
     stepName?: SortOrder
+    stmtType?: SortOrder
+    contextType?: SortOrder
     status?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
@@ -33713,8 +33912,11 @@ export namespace Prisma {
   export type TestStepResultMaxOrderByAggregateInput = {
     id?: SortOrder
     testCaseRunId?: SortOrder
+    parentStepId?: SortOrder
     stepNumber?: SortOrder
     stepName?: SortOrder
+    stmtType?: SortOrder
+    contextType?: SortOrder
     status?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
@@ -33727,8 +33929,11 @@ export namespace Prisma {
   export type TestStepResultMinOrderByAggregateInput = {
     id?: SortOrder
     testCaseRunId?: SortOrder
+    parentStepId?: SortOrder
     stepNumber?: SortOrder
     stepName?: SortOrder
+    stmtType?: SortOrder
+    contextType?: SortOrder
     status?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
@@ -35702,6 +35907,26 @@ export namespace Prisma {
     connect?: TestCaseRunWhereUniqueInput
   }
 
+  export type TestStepResultCreateNestedOneWithoutChildStepsInput = {
+    create?: XOR<TestStepResultCreateWithoutChildStepsInput, TestStepResultUncheckedCreateWithoutChildStepsInput>
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutChildStepsInput
+    connect?: TestStepResultWhereUniqueInput
+  }
+
+  export type TestStepResultCreateNestedManyWithoutParentStepInput = {
+    create?: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput> | TestStepResultCreateWithoutParentStepInput[] | TestStepResultUncheckedCreateWithoutParentStepInput[]
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutParentStepInput | TestStepResultCreateOrConnectWithoutParentStepInput[]
+    createMany?: TestStepResultCreateManyParentStepInputEnvelope
+    connect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+  }
+
+  export type TestStepResultUncheckedCreateNestedManyWithoutParentStepInput = {
+    create?: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput> | TestStepResultCreateWithoutParentStepInput[] | TestStepResultUncheckedCreateWithoutParentStepInput[]
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutParentStepInput | TestStepResultCreateOrConnectWithoutParentStepInput[]
+    createMany?: TestStepResultCreateManyParentStepInputEnvelope
+    connect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+  }
+
   export type EnumTestStepStatusFieldUpdateOperationsInput = {
     set?: $Enums.TestStepStatus
   }
@@ -35712,6 +35937,44 @@ export namespace Prisma {
     upsert?: TestCaseRunUpsertWithoutStepResultsInput
     connect?: TestCaseRunWhereUniqueInput
     update?: XOR<XOR<TestCaseRunUpdateToOneWithWhereWithoutStepResultsInput, TestCaseRunUpdateWithoutStepResultsInput>, TestCaseRunUncheckedUpdateWithoutStepResultsInput>
+  }
+
+  export type TestStepResultUpdateOneWithoutChildStepsNestedInput = {
+    create?: XOR<TestStepResultCreateWithoutChildStepsInput, TestStepResultUncheckedCreateWithoutChildStepsInput>
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutChildStepsInput
+    upsert?: TestStepResultUpsertWithoutChildStepsInput
+    disconnect?: TestStepResultWhereInput | boolean
+    delete?: TestStepResultWhereInput | boolean
+    connect?: TestStepResultWhereUniqueInput
+    update?: XOR<XOR<TestStepResultUpdateToOneWithWhereWithoutChildStepsInput, TestStepResultUpdateWithoutChildStepsInput>, TestStepResultUncheckedUpdateWithoutChildStepsInput>
+  }
+
+  export type TestStepResultUpdateManyWithoutParentStepNestedInput = {
+    create?: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput> | TestStepResultCreateWithoutParentStepInput[] | TestStepResultUncheckedCreateWithoutParentStepInput[]
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutParentStepInput | TestStepResultCreateOrConnectWithoutParentStepInput[]
+    upsert?: TestStepResultUpsertWithWhereUniqueWithoutParentStepInput | TestStepResultUpsertWithWhereUniqueWithoutParentStepInput[]
+    createMany?: TestStepResultCreateManyParentStepInputEnvelope
+    set?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    disconnect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    delete?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    connect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    update?: TestStepResultUpdateWithWhereUniqueWithoutParentStepInput | TestStepResultUpdateWithWhereUniqueWithoutParentStepInput[]
+    updateMany?: TestStepResultUpdateManyWithWhereWithoutParentStepInput | TestStepResultUpdateManyWithWhereWithoutParentStepInput[]
+    deleteMany?: TestStepResultScalarWhereInput | TestStepResultScalarWhereInput[]
+  }
+
+  export type TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput = {
+    create?: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput> | TestStepResultCreateWithoutParentStepInput[] | TestStepResultUncheckedCreateWithoutParentStepInput[]
+    connectOrCreate?: TestStepResultCreateOrConnectWithoutParentStepInput | TestStepResultCreateOrConnectWithoutParentStepInput[]
+    upsert?: TestStepResultUpsertWithWhereUniqueWithoutParentStepInput | TestStepResultUpsertWithWhereUniqueWithoutParentStepInput[]
+    createMany?: TestStepResultCreateManyParentStepInputEnvelope
+    set?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    disconnect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    delete?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    connect?: TestStepResultWhereUniqueInput | TestStepResultWhereUniqueInput[]
+    update?: TestStepResultUpdateWithWhereUniqueWithoutParentStepInput | TestStepResultUpdateWithWhereUniqueWithoutParentStepInput[]
+    updateMany?: TestStepResultUpdateManyWithWhereWithoutParentStepInput | TestStepResultUpdateManyWithWhereWithoutParentStepInput[]
+    deleteMany?: TestStepResultScalarWhereInput | TestStepResultScalarWhereInput[]
   }
 
   export type ProjectCreateNestedOneWithoutPagesInput = {
@@ -39912,6 +40175,8 @@ export namespace Prisma {
     id?: string
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -39919,12 +40184,17 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
+    childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
   }
 
   export type TestStepResultUncheckedCreateWithoutTestCaseRunInput = {
     id?: string
+    parentStepId?: string | null
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -39932,6 +40202,7 @@ export namespace Prisma {
     errorMessage?: string | null
     screenshot?: string | null
     logs?: string | null
+    childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
   }
 
   export type TestStepResultCreateOrConnectWithoutTestCaseRunInput = {
@@ -40034,8 +40305,11 @@ export namespace Prisma {
     NOT?: TestStepResultScalarWhereInput | TestStepResultScalarWhereInput[]
     id?: StringFilter<"TestStepResult"> | string
     testCaseRunId?: StringFilter<"TestStepResult"> | string
+    parentStepId?: StringNullableFilter<"TestStepResult"> | string | null
     stepNumber?: IntFilter<"TestStepResult"> | number
     stepName?: StringFilter<"TestStepResult"> | string
+    stmtType?: StringFilter<"TestStepResult"> | string
+    contextType?: StringNullableFilter<"TestStepResult"> | string | null
     status?: EnumTestStepStatusFilter<"TestStepResult"> | $Enums.TestStepStatus
     startedAt?: DateTimeFilter<"TestStepResult"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestStepResult"> | Date | string | null
@@ -40070,6 +40344,89 @@ export namespace Prisma {
     create: XOR<TestCaseRunCreateWithoutStepResultsInput, TestCaseRunUncheckedCreateWithoutStepResultsInput>
   }
 
+  export type TestStepResultCreateWithoutChildStepsInput = {
+    id?: string
+    stepNumber: number
+    stepName: string
+    stmtType: string
+    contextType?: string | null
+    status?: $Enums.TestStepStatus
+    startedAt?: Date | string
+    completedAt?: Date | string | null
+    duration?: number | null
+    errorMessage?: string | null
+    screenshot?: string | null
+    logs?: string | null
+    testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
+    parentStep?: TestStepResultCreateNestedOneWithoutChildStepsInput
+  }
+
+  export type TestStepResultUncheckedCreateWithoutChildStepsInput = {
+    id?: string
+    testCaseRunId: string
+    parentStepId?: string | null
+    stepNumber: number
+    stepName: string
+    stmtType: string
+    contextType?: string | null
+    status?: $Enums.TestStepStatus
+    startedAt?: Date | string
+    completedAt?: Date | string | null
+    duration?: number | null
+    errorMessage?: string | null
+    screenshot?: string | null
+    logs?: string | null
+  }
+
+  export type TestStepResultCreateOrConnectWithoutChildStepsInput = {
+    where: TestStepResultWhereUniqueInput
+    create: XOR<TestStepResultCreateWithoutChildStepsInput, TestStepResultUncheckedCreateWithoutChildStepsInput>
+  }
+
+  export type TestStepResultCreateWithoutParentStepInput = {
+    id?: string
+    stepNumber: number
+    stepName: string
+    stmtType: string
+    contextType?: string | null
+    status?: $Enums.TestStepStatus
+    startedAt?: Date | string
+    completedAt?: Date | string | null
+    duration?: number | null
+    errorMessage?: string | null
+    screenshot?: string | null
+    logs?: string | null
+    testCaseRun: TestCaseRunCreateNestedOneWithoutStepResultsInput
+    childSteps?: TestStepResultCreateNestedManyWithoutParentStepInput
+  }
+
+  export type TestStepResultUncheckedCreateWithoutParentStepInput = {
+    id?: string
+    testCaseRunId: string
+    stepNumber: number
+    stepName: string
+    stmtType: string
+    contextType?: string | null
+    status?: $Enums.TestStepStatus
+    startedAt?: Date | string
+    completedAt?: Date | string | null
+    duration?: number | null
+    errorMessage?: string | null
+    screenshot?: string | null
+    logs?: string | null
+    childSteps?: TestStepResultUncheckedCreateNestedManyWithoutParentStepInput
+  }
+
+  export type TestStepResultCreateOrConnectWithoutParentStepInput = {
+    where: TestStepResultWhereUniqueInput
+    create: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput>
+  }
+
+  export type TestStepResultCreateManyParentStepInputEnvelope = {
+    data: TestStepResultCreateManyParentStepInput | TestStepResultCreateManyParentStepInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TestCaseRunUpsertWithoutStepResultsInput = {
     update: XOR<TestCaseRunUpdateWithoutStepResultsInput, TestCaseRunUncheckedUpdateWithoutStepResultsInput>
     create: XOR<TestCaseRunCreateWithoutStepResultsInput, TestCaseRunUncheckedCreateWithoutStepResultsInput>
@@ -40099,6 +40456,67 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type TestStepResultUpsertWithoutChildStepsInput = {
+    update: XOR<TestStepResultUpdateWithoutChildStepsInput, TestStepResultUncheckedUpdateWithoutChildStepsInput>
+    create: XOR<TestStepResultCreateWithoutChildStepsInput, TestStepResultUncheckedCreateWithoutChildStepsInput>
+    where?: TestStepResultWhereInput
+  }
+
+  export type TestStepResultUpdateToOneWithWhereWithoutChildStepsInput = {
+    where?: TestStepResultWhereInput
+    data: XOR<TestStepResultUpdateWithoutChildStepsInput, TestStepResultUncheckedUpdateWithoutChildStepsInput>
+  }
+
+  export type TestStepResultUpdateWithoutChildStepsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stepNumber?: IntFieldUpdateOperationsInput | number
+    stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    screenshot?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
+    parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
+  }
+
+  export type TestStepResultUncheckedUpdateWithoutChildStepsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    testCaseRunId?: StringFieldUpdateOperationsInput | string
+    parentStepId?: NullableStringFieldUpdateOperationsInput | string | null
+    stepNumber?: IntFieldUpdateOperationsInput | number
+    stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    screenshot?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TestStepResultUpsertWithWhereUniqueWithoutParentStepInput = {
+    where: TestStepResultWhereUniqueInput
+    update: XOR<TestStepResultUpdateWithoutParentStepInput, TestStepResultUncheckedUpdateWithoutParentStepInput>
+    create: XOR<TestStepResultCreateWithoutParentStepInput, TestStepResultUncheckedCreateWithoutParentStepInput>
+  }
+
+  export type TestStepResultUpdateWithWhereUniqueWithoutParentStepInput = {
+    where: TestStepResultWhereUniqueInput
+    data: XOR<TestStepResultUpdateWithoutParentStepInput, TestStepResultUncheckedUpdateWithoutParentStepInput>
+  }
+
+  export type TestStepResultUpdateManyWithWhereWithoutParentStepInput = {
+    where: TestStepResultScalarWhereInput
+    data: XOR<TestStepResultUpdateManyMutationInput, TestStepResultUncheckedUpdateManyWithoutParentStepInput>
   }
 
   export type ProjectCreateWithoutPagesInput = {
@@ -42354,8 +42772,11 @@ export namespace Prisma {
 
   export type TestStepResultCreateManyTestCaseRunInput = {
     id?: string
+    parentStepId?: string | null
     stepNumber: number
     stepName: string
+    stmtType: string
+    contextType?: string | null
     status?: $Enums.TestStepStatus
     startedAt?: Date | string
     completedAt?: Date | string | null
@@ -42369,6 +42790,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42376,12 +42799,34 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     screenshot?: NullableStringFieldUpdateOperationsInput | string | null
     logs?: NullableStringFieldUpdateOperationsInput | string | null
+    parentStep?: TestStepResultUpdateOneWithoutChildStepsNestedInput
+    childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
   }
 
   export type TestStepResultUncheckedUpdateWithoutTestCaseRunInput = {
     id?: StringFieldUpdateOperationsInput | string
+    parentStepId?: NullableStringFieldUpdateOperationsInput | string | null
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    screenshot?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
+  }
+
+  export type TestStepResultUncheckedUpdateManyWithoutTestCaseRunInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    parentStepId?: NullableStringFieldUpdateOperationsInput | string | null
+    stepNumber?: IntFieldUpdateOperationsInput | number
+    stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42391,10 +42836,63 @@ export namespace Prisma {
     logs?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type TestStepResultUncheckedUpdateManyWithoutTestCaseRunInput = {
+  export type TestStepResultCreateManyParentStepInput = {
+    id?: string
+    testCaseRunId: string
+    stepNumber: number
+    stepName: string
+    stmtType: string
+    contextType?: string | null
+    status?: $Enums.TestStepStatus
+    startedAt?: Date | string
+    completedAt?: Date | string | null
+    duration?: number | null
+    errorMessage?: string | null
+    screenshot?: string | null
+    logs?: string | null
+  }
+
+  export type TestStepResultUpdateWithoutParentStepInput = {
     id?: StringFieldUpdateOperationsInput | string
     stepNumber?: IntFieldUpdateOperationsInput | number
     stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    screenshot?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    testCaseRun?: TestCaseRunUpdateOneRequiredWithoutStepResultsNestedInput
+    childSteps?: TestStepResultUpdateManyWithoutParentStepNestedInput
+  }
+
+  export type TestStepResultUncheckedUpdateWithoutParentStepInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    testCaseRunId?: StringFieldUpdateOperationsInput | string
+    stepNumber?: IntFieldUpdateOperationsInput | number
+    stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    screenshot?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: NullableStringFieldUpdateOperationsInput | string | null
+    childSteps?: TestStepResultUncheckedUpdateManyWithoutParentStepNestedInput
+  }
+
+  export type TestStepResultUncheckedUpdateManyWithoutParentStepInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    testCaseRunId?: StringFieldUpdateOperationsInput | string
+    stepNumber?: IntFieldUpdateOperationsInput | number
+    stepName?: StringFieldUpdateOperationsInput | string
+    stmtType?: StringFieldUpdateOperationsInput | string
+    contextType?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTestStepStatusFieldUpdateOperationsInput | $Enums.TestStepStatus
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

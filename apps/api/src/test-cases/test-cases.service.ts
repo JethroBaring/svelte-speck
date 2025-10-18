@@ -104,20 +104,7 @@ export class TestCasesService {
   ) {
     for (const r of result?.results || []) {
       await this.prisma.testStepResult.create({
-        data: {
-          testCaseRunId: testCaseRunId,
-          stepNumber: r.step,
-          stepName: r.command,
-          screenshot: r.screenshotUrl,
-          status: r.status,
-
-          // Will be finalized in the future
-          startedAt: new Date(),
-          completedAt: new Date(),
-          duration: 0,
-          errorMessage: null,
-          logs: null,
-        },
+        data: r,
       });
     }
 

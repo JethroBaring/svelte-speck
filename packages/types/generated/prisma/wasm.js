@@ -277,8 +277,11 @@ exports.Prisma.TestCaseRunScalarFieldEnum = {
 exports.Prisma.TestStepResultScalarFieldEnum = {
   id: 'id',
   testCaseRunId: 'testCaseRunId',
+  parentStepId: 'parentStepId',
   stepNumber: 'stepNumber',
   stepName: 'stepName',
+  stmtType: 'stmtType',
+  contextType: 'contextType',
   status: 'status',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
