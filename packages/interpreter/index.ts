@@ -1,11 +1,11 @@
 // Main exports for the interpreter package
-export { Scanner } from './src/scanner';
-export { Parser } from './src/parser';
-export { Interpreter } from './src/interpreter';
+export { Scanner } from './src/scanner.js';
+export { Parser } from './src/parser.js';
+export { Interpreter } from './src/interpreter.js';
 
 // Token and AST exports
-export { Token } from './src/token';
-export { TokenType } from './src/token-type';
+export { Token } from './src/token.js';
+export { TokenType } from './src/token-type.js';
 
 // Expression exports
 export {
@@ -18,7 +18,7 @@ export {
   Logical,
   Unary,
   Variable,
-} from './src/expr';
+} from './src/expr.js';
 
 // Statement exports
 export {
@@ -44,10 +44,10 @@ export {
   ForEachStmt,
   RepeatStmt,
   CallStmt,
-} from './src/stmt';
+} from './src/stmt.js';
 
 // Environment export
-export { Environment } from './src/environment';
+export { Environment } from './src/environment.js';
 
 // Parameter export
-export { Parameter } from './src/parameter';
+export { Parameter } from './src/parameter.js';

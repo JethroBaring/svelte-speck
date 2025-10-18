@@ -5,11 +5,17 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --declaration && node scripts/build-bundled.cjs",
     "check-types": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["dsl", "interpreter", "test-automation", "parser", "scanner"],
+  "keywords": [
+    "dsl",
+    "interpreter",
+    "test-automation",
+    "parser",
+    "scanner"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -17,13 +23,15 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "esbuild": "^0.25.11",
     "typescript": "^5.7.3"
   },
+  "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   }
 }

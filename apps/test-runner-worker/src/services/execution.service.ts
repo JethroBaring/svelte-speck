@@ -54,12 +54,10 @@ class ExecutionService {
   private testSuiteVariablesHash: Map<string, any>;
   private projectFunctionsHash: Map<string, any>;
   private testSuiteFunctionsHash: Map<string, any>;
-  private screenshotsDir: string;
   private interpreter: Interpreter;
   private environment: Environment;
 
   constructor() {
-    this.screenshotsDir = path.join(__dirname, '../screenshots');
     this.projectVariablesHash = new Map();
     this.testSuiteVariablesHash = new Map();
     this.projectFunctionsHash = new Map();

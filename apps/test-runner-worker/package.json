@@ -2,6 +2,7 @@
   "name": "test-runner-worker",
   "version": "1.0.0",
   "description": "Playwright test runner microservice",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
