@@ -85,6 +85,7 @@ export class TestSuitesService {
       data: testCases.map((testCase) => ({
         testCaseId: testCase.id,
         testSuiteRunId: testSuiteRun.id,
+        code: testCase.code
       })),
     });
 

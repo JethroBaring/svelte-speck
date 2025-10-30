@@ -276,6 +276,7 @@ model TestCaseRun {
   startedAt      DateTime          @default(now()) @map("started_at")
   completedAt    DateTime?         @map("completed_at")
   duration       Int? // Duration in milliseconds
+  code           String           @db.Text // Store the test case code at execution time
 
   // Relations
   testCase     TestCase         @relation("TestCaseRuns", fields: [testCaseId], references: [id], onDelete: Cascade)
@@ -305,7 +306,7 @@ model TestStepResult {
   // Relations
   testCaseRun TestCaseRun @relation("TestCaseRunSteps", fields: [testCaseRunId], references: [id], onDelete: Cascade)
 
-  parentStep TestStepResult? @relation("ChildSteps", fields: [parentStepId], references: [id], onDelete: Cascade)
+  parentStep TestStepResult?  @relation("ChildSteps", fields: [parentStepId], references: [id], onDelete: Cascade)
   childSteps TestStepResult[] @relation("ChildSteps")
 
   @@map("test_step_results")
@@ -406,12 +407,12 @@ model WorkspaceInvitation {
 }
 
 enum StepContextType {
-  NONE        // simple step
-  LOOP        // repeat / loop
-  FOREACH     // for-each
+  NONE // simple step
+  LOOP // repeat / loop
+  FOREACH // for-each
   CONDITIONAL // if / else
-  FUNCTION    // function definition or call context
-  CALL        // call site (separate from FUNCTION if you want)
+  FUNCTION // function definition or call context
+  CALL // call site (separate from FUNCTION if you want)
 }
 
 enum NotificationType {

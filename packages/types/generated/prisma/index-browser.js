@@ -271,7 +271,8 @@ exports.Prisma.TestCaseRunScalarFieldEnum = {
   status: 'status',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
-  duration: 'duration'
+  duration: 'duration',
+  code: 'code'
 };
 
 exports.Prisma.TestStepResultScalarFieldEnum = {

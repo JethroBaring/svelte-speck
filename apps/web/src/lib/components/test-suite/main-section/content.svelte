@@ -32,11 +32,6 @@
 		() => code,
 		async (value, signal) => {
 			if (!currentEditingId) return;
-			const scanner = new Scanner(code);
-      const tokens = scanner.scanTokens();
-      const parser = new Parser(tokens);
-      const statements = parser.parse();
-			console.log(statements)
 			const payload = { code: value } as unknown as TestCaseUpdateInput;
 			const res = await updateTestCase(currentEditingId, payload, { signal });
 			if (res.data) {

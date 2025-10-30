@@ -40,7 +40,7 @@ export const TestSuiteFunctionScalarFieldEnumSchema = z.enum(['id','testSuiteId'
 
 export const TestSuiteRunScalarFieldEnumSchema = z.enum(['id','testSuiteId','status','startedAt','completedAt','totalTests','passedTests','failedTests','skippedTests']);
 
-export const TestCaseRunScalarFieldEnumSchema = z.enum(['id','testCaseId','testSuiteRunId','status','startedAt','completedAt','duration']);
+export const TestCaseRunScalarFieldEnumSchema = z.enum(['id','testCaseId','testSuiteRunId','status','startedAt','completedAt','duration','code']);
 
 export const TestStepResultScalarFieldEnumSchema = z.enum(['id','testCaseRunId','parentStepId','stepNumber','stepName','stmtType','contextType','status','startedAt','completedAt','duration','errorMessage','screenshot','logs','isLastStep']);
 
@@ -338,6 +338,7 @@ export const TestCaseRunSchema = z.object({
   startedAt: z.coerce.date(),
   completedAt: z.coerce.date().nullable(),
   duration: z.number().int().nullable(),
+  code: z.string(),
 })
 
 export type TestCaseRun = z.infer<typeof TestCaseRunSchema>
@@ -986,6 +987,7 @@ export const TestCaseRunSelectSchema: z.ZodType<Prisma.TestCaseRunSelect> = z.ob
   startedAt: z.boolean().optional(),
   completedAt: z.boolean().optional(),
   duration: z.boolean().optional(),
+  code: z.boolean().optional(),
   testCase: z.union([z.boolean(),z.lazy(() => TestCaseArgsSchema)]).optional(),
   testSuiteRun: z.union([z.boolean(),z.lazy(() => TestSuiteRunArgsSchema)]).optional(),
   stepResults: z.union([z.boolean(),z.lazy(() => TestStepResultFindManyArgsSchema)]).optional(),
@@ -2392,6 +2394,7 @@ export const TestCaseRunWhereInputSchema: z.ZodType<Prisma.TestCaseRunWhereInput
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  code: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testCase: z.union([ z.lazy(() => TestCaseScalarRelationFilterSchema),z.lazy(() => TestCaseWhereInputSchema) ]).optional(),
   testSuiteRun: z.union([ z.lazy(() => TestSuiteRunScalarRelationFilterSchema),z.lazy(() => TestSuiteRunWhereInputSchema) ]).optional(),
   stepResults: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
@@ -2405,6 +2408,7 @@ export const TestCaseRunOrderByWithRelationInputSchema: z.ZodType<Prisma.TestCas
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   duration: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  code: z.lazy(() => SortOrderSchema).optional(),
   testCase: z.lazy(() => TestCaseOrderByWithRelationInputSchema).optional(),
   testSuiteRun: z.lazy(() => TestSuiteRunOrderByWithRelationInputSchema).optional(),
   stepResults: z.lazy(() => TestStepResultOrderByRelationAggregateInputSchema).optional()
@@ -2424,6 +2428,7 @@ export const TestCaseRunWhereUniqueInputSchema: z.ZodType<Prisma.TestCaseRunWher
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
+  code: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testCase: z.union([ z.lazy(() => TestCaseScalarRelationFilterSchema),z.lazy(() => TestCaseWhereInputSchema) ]).optional(),
   testSuiteRun: z.union([ z.lazy(() => TestSuiteRunScalarRelationFilterSchema),z.lazy(() => TestSuiteRunWhereInputSchema) ]).optional(),
   stepResults: z.lazy(() => TestStepResultListRelationFilterSchema).optional()
@@ -2437,6 +2442,7 @@ export const TestCaseRunOrderByWithAggregationInputSchema: z.ZodType<Prisma.Test
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   duration: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  code: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => TestCaseRunCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => TestCaseRunAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => TestCaseRunMaxOrderByAggregateInputSchema).optional(),
@@ -2455,6 +2461,7 @@ export const TestCaseRunScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.T
   startedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  code: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const TestStepResultWhereInputSchema: z.ZodType<Prisma.TestStepResultWhereInput> = z.object({
@@ -4135,6 +4142,7 @@ export const TestCaseRunCreateInputSchema: z.ZodType<Prisma.TestCaseRunCreateInp
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   testCase: z.lazy(() => TestCaseCreateNestedOneWithoutTestCaseRunsInputSchema),
   testSuiteRun: z.lazy(() => TestSuiteRunCreateNestedOneWithoutTestCaseRunsInputSchema),
   stepResults: z.lazy(() => TestStepResultCreateNestedManyWithoutTestCaseRunInputSchema).optional()
@@ -4148,6 +4156,7 @@ export const TestCaseRunUncheckedCreateInputSchema: z.ZodType<Prisma.TestCaseRun
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   stepResults: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInputSchema).optional()
 }).strict();
 
@@ -4157,6 +4166,7 @@ export const TestCaseRunUpdateInputSchema: z.ZodType<Prisma.TestCaseRunUpdateInp
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testCase: z.lazy(() => TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional(),
   testSuiteRun: z.lazy(() => TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional(),
   stepResults: z.lazy(() => TestStepResultUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
@@ -4170,6 +4180,7 @@ export const TestCaseRunUncheckedUpdateInputSchema: z.ZodType<Prisma.TestCaseRun
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepResults: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
 }).strict();
 
@@ -4180,7 +4191,8 @@ export const TestCaseRunCreateManyInputSchema: z.ZodType<Prisma.TestCaseRunCreat
   status: z.lazy(() => TestCaseRunStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
-  duration: z.number().int().optional().nullable()
+  duration: z.number().int().optional().nullable(),
+  code: z.string()
 }).strict();
 
 export const TestCaseRunUpdateManyMutationInputSchema: z.ZodType<Prisma.TestCaseRunUpdateManyMutationInput> = z.object({
@@ -4189,6 +4201,7 @@ export const TestCaseRunUpdateManyMutationInputSchema: z.ZodType<Prisma.TestCase
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestCaseRunUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestCaseRunUncheckedUpdateManyInput> = z.object({
@@ -4199,6 +4212,7 @@ export const TestCaseRunUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestCas
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultCreateInputSchema: z.ZodType<Prisma.TestStepResultCreateInput> = z.object({
@@ -5735,7 +5749,8 @@ export const TestCaseRunCountOrderByAggregateInputSchema: z.ZodType<Prisma.TestC
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
-  duration: z.lazy(() => SortOrderSchema).optional()
+  duration: z.lazy(() => SortOrderSchema).optional(),
+  code: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestCaseRunAvgOrderByAggregateInputSchema: z.ZodType<Prisma.TestCaseRunAvgOrderByAggregateInput> = z.object({
@@ -5749,7 +5764,8 @@ export const TestCaseRunMaxOrderByAggregateInputSchema: z.ZodType<Prisma.TestCas
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
-  duration: z.lazy(() => SortOrderSchema).optional()
+  duration: z.lazy(() => SortOrderSchema).optional(),
+  code: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestCaseRunMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestCaseRunMinOrderByAggregateInput> = z.object({
@@ -5759,7 +5775,8 @@ export const TestCaseRunMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestCas
   status: z.lazy(() => SortOrderSchema).optional(),
   startedAt: z.lazy(() => SortOrderSchema).optional(),
   completedAt: z.lazy(() => SortOrderSchema).optional(),
-  duration: z.lazy(() => SortOrderSchema).optional()
+  duration: z.lazy(() => SortOrderSchema).optional(),
+  code: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestCaseRunSumOrderByAggregateInputSchema: z.ZodType<Prisma.TestCaseRunSumOrderByAggregateInput> = z.object({
@@ -11952,6 +11969,7 @@ export const TestCaseRunCreateWithoutTestSuiteRunInputSchema: z.ZodType<Prisma.T
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   testCase: z.lazy(() => TestCaseCreateNestedOneWithoutTestCaseRunsInputSchema),
   stepResults: z.lazy(() => TestStepResultCreateNestedManyWithoutTestCaseRunInputSchema).optional()
 }).strict();
@@ -11963,6 +11981,7 @@ export const TestCaseRunUncheckedCreateWithoutTestSuiteRunInputSchema: z.ZodType
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   stepResults: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInputSchema).optional()
 }).strict();
 
@@ -12038,6 +12057,7 @@ export const TestCaseRunScalarWhereInputSchema: z.ZodType<Prisma.TestCaseRunScal
   startedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   completedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  code: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const TestCaseCreateWithoutTestCaseRunsInputSchema: z.ZodType<Prisma.TestCaseCreateWithoutTestCaseRunsInput> = z.object({
@@ -12253,6 +12273,7 @@ export const TestCaseRunCreateWithoutStepResultsInputSchema: z.ZodType<Prisma.Te
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   testCase: z.lazy(() => TestCaseCreateNestedOneWithoutTestCaseRunsInputSchema),
   testSuiteRun: z.lazy(() => TestSuiteRunCreateNestedOneWithoutTestCaseRunsInputSchema)
 }).strict();
@@ -12264,7 +12285,8 @@ export const TestCaseRunUncheckedCreateWithoutStepResultsInputSchema: z.ZodType<
   status: z.lazy(() => TestCaseRunStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
-  duration: z.number().int().optional().nullable()
+  duration: z.number().int().optional().nullable(),
+  code: z.string()
 }).strict();
 
 export const TestCaseRunCreateOrConnectWithoutStepResultsInputSchema: z.ZodType<Prisma.TestCaseRunCreateOrConnectWithoutStepResultsInput> = z.object({
@@ -12376,6 +12398,7 @@ export const TestCaseRunUpdateWithoutStepResultsInputSchema: z.ZodType<Prisma.Te
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testCase: z.lazy(() => TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional(),
   testSuiteRun: z.lazy(() => TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional()
 }).strict();
@@ -12388,6 +12411,7 @@ export const TestCaseRunUncheckedUpdateWithoutStepResultsInputSchema: z.ZodType<
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultUpsertWithoutChildStepsInputSchema: z.ZodType<Prisma.TestStepResultUpsertWithoutChildStepsInput> = z.object({
@@ -12955,6 +12979,7 @@ export const TestCaseRunCreateWithoutTestCaseInputSchema: z.ZodType<Prisma.TestC
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   testSuiteRun: z.lazy(() => TestSuiteRunCreateNestedOneWithoutTestCaseRunsInputSchema),
   stepResults: z.lazy(() => TestStepResultCreateNestedManyWithoutTestCaseRunInputSchema).optional()
 }).strict();
@@ -12966,6 +12991,7 @@ export const TestCaseRunUncheckedCreateWithoutTestCaseInputSchema: z.ZodType<Pri
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   duration: z.number().int().optional().nullable(),
+  code: z.string(),
   stepResults: z.lazy(() => TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInputSchema).optional()
 }).strict();
 
@@ -14672,7 +14698,8 @@ export const TestCaseRunCreateManyTestSuiteRunInputSchema: z.ZodType<Prisma.Test
   status: z.lazy(() => TestCaseRunStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
-  duration: z.number().int().optional().nullable()
+  duration: z.number().int().optional().nullable(),
+  code: z.string()
 }).strict();
 
 export const TestCaseRunUpdateWithoutTestSuiteRunInputSchema: z.ZodType<Prisma.TestCaseRunUpdateWithoutTestSuiteRunInput> = z.object({
@@ -14681,6 +14708,7 @@ export const TestCaseRunUpdateWithoutTestSuiteRunInputSchema: z.ZodType<Prisma.T
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testCase: z.lazy(() => TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional(),
   stepResults: z.lazy(() => TestStepResultUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
 }).strict();
@@ -14692,6 +14720,7 @@ export const TestCaseRunUncheckedUpdateWithoutTestSuiteRunInputSchema: z.ZodType
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepResults: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
 }).strict();
 
@@ -14702,6 +14731,7 @@ export const TestCaseRunUncheckedUpdateManyWithoutTestSuiteRunInputSchema: z.Zod
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestStepResultCreateManyTestCaseRunInputSchema: z.ZodType<Prisma.TestStepResultCreateManyTestCaseRunInput> = z.object({
@@ -14886,7 +14916,8 @@ export const TestCaseRunCreateManyTestCaseInputSchema: z.ZodType<Prisma.TestCase
   status: z.lazy(() => TestCaseRunStatusSchema).optional(),
   startedAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
-  duration: z.number().int().optional().nullable()
+  duration: z.number().int().optional().nullable(),
+  code: z.string()
 }).strict();
 
 export const TestCaseCommentCreateManyTestCaseInputSchema: z.ZodType<Prisma.TestCaseCommentCreateManyTestCaseInput> = z.object({
@@ -14903,6 +14934,7 @@ export const TestCaseRunUpdateWithoutTestCaseInputSchema: z.ZodType<Prisma.TestC
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testSuiteRun: z.lazy(() => TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInputSchema).optional(),
   stepResults: z.lazy(() => TestStepResultUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
 }).strict();
@@ -14914,6 +14946,7 @@ export const TestCaseRunUncheckedUpdateWithoutTestCaseInputSchema: z.ZodType<Pri
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   stepResults: z.lazy(() => TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInputSchema).optional()
 }).strict();
 
@@ -14924,6 +14957,7 @@ export const TestCaseRunUncheckedUpdateManyWithoutTestCaseInputSchema: z.ZodType
   startedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   completedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  code: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestCaseCommentUpdateWithoutTestCaseInputSchema: z.ZodType<Prisma.TestCaseCommentUpdateWithoutTestCaseInput> = z.object({

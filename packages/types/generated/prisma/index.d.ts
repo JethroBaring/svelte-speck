@@ -19783,6 +19783,7 @@ export namespace Prisma {
     startedAt: Date | null
     completedAt: Date | null
     duration: number | null
+    code: string | null
   }
 
   export type TestCaseRunMaxAggregateOutputType = {
@@ -19793,6 +19794,7 @@ export namespace Prisma {
     startedAt: Date | null
     completedAt: Date | null
     duration: number | null
+    code: string | null
   }
 
   export type TestCaseRunCountAggregateOutputType = {
@@ -19803,6 +19805,7 @@ export namespace Prisma {
     startedAt: number
     completedAt: number
     duration: number
+    code: number
     _all: number
   }
 
@@ -19823,6 +19826,7 @@ export namespace Prisma {
     startedAt?: true
     completedAt?: true
     duration?: true
+    code?: true
   }
 
   export type TestCaseRunMaxAggregateInputType = {
@@ -19833,6 +19837,7 @@ export namespace Prisma {
     startedAt?: true
     completedAt?: true
     duration?: true
+    code?: true
   }
 
   export type TestCaseRunCountAggregateInputType = {
@@ -19843,6 +19848,7 @@ export namespace Prisma {
     startedAt?: true
     completedAt?: true
     duration?: true
+    code?: true
     _all?: true
   }
 
@@ -19940,6 +19946,7 @@ export namespace Prisma {
     startedAt: Date
     completedAt: Date | null
     duration: number | null
+    code: string
     _count: TestCaseRunCountAggregateOutputType | null
     _avg: TestCaseRunAvgAggregateOutputType | null
     _sum: TestCaseRunSumAggregateOutputType | null
@@ -19969,6 +19976,7 @@ export namespace Prisma {
     startedAt?: boolean
     completedAt?: boolean
     duration?: boolean
+    code?: boolean
     testCase?: boolean | TestCaseDefaultArgs<ExtArgs>
     testSuiteRun?: boolean | TestSuiteRunDefaultArgs<ExtArgs>
     stepResults?: boolean | TestCaseRun$stepResultsArgs<ExtArgs>
@@ -19983,6 +19991,7 @@ export namespace Prisma {
     startedAt?: boolean
     completedAt?: boolean
     duration?: boolean
+    code?: boolean
     testCase?: boolean | TestCaseDefaultArgs<ExtArgs>
     testSuiteRun?: boolean | TestSuiteRunDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["testCaseRun"]>
@@ -19995,6 +20004,7 @@ export namespace Prisma {
     startedAt?: boolean
     completedAt?: boolean
     duration?: boolean
+    code?: boolean
     testCase?: boolean | TestCaseDefaultArgs<ExtArgs>
     testSuiteRun?: boolean | TestSuiteRunDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["testCaseRun"]>
@@ -20007,9 +20017,10 @@ export namespace Prisma {
     startedAt?: boolean
     completedAt?: boolean
     duration?: boolean
+    code?: boolean
   }
 
-  export type TestCaseRunOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseId" | "testSuiteRunId" | "status" | "startedAt" | "completedAt" | "duration", ExtArgs["result"]["testCaseRun"]>
+  export type TestCaseRunOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "testCaseId" | "testSuiteRunId" | "status" | "startedAt" | "completedAt" | "duration" | "code", ExtArgs["result"]["testCaseRun"]>
   export type TestCaseRunInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     testCase?: boolean | TestCaseDefaultArgs<ExtArgs>
     testSuiteRun?: boolean | TestSuiteRunDefaultArgs<ExtArgs>
@@ -20040,6 +20051,7 @@ export namespace Prisma {
       startedAt: Date
       completedAt: Date | null
       duration: number | null
+      code: string
     }, ExtArgs["result"]["testCaseRun"]>
     composites: {}
   }
@@ -20473,6 +20485,7 @@ export namespace Prisma {
     readonly startedAt: FieldRef<"TestCaseRun", 'DateTime'>
     readonly completedAt: FieldRef<"TestCaseRun", 'DateTime'>
     readonly duration: FieldRef<"TestCaseRun", 'Int'>
+    readonly code: FieldRef<"TestCaseRun", 'String'>
   }
     
 
@@ -29159,7 +29172,8 @@ export namespace Prisma {
     status: 'status',
     startedAt: 'startedAt',
     completedAt: 'completedAt',
-    duration: 'duration'
+    duration: 'duration',
+    code: 'code'
   };
 
   export type TestCaseRunScalarFieldEnum = (typeof TestCaseRunScalarFieldEnum)[keyof typeof TestCaseRunScalarFieldEnum]
@@ -30520,6 +30534,7 @@ export namespace Prisma {
     startedAt?: DateTimeFilter<"TestCaseRun"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestCaseRun"> | Date | string | null
     duration?: IntNullableFilter<"TestCaseRun"> | number | null
+    code?: StringFilter<"TestCaseRun"> | string
     testCase?: XOR<TestCaseScalarRelationFilter, TestCaseWhereInput>
     testSuiteRun?: XOR<TestSuiteRunScalarRelationFilter, TestSuiteRunWhereInput>
     stepResults?: TestStepResultListRelationFilter
@@ -30533,6 +30548,7 @@ export namespace Prisma {
     startedAt?: SortOrder
     completedAt?: SortOrderInput | SortOrder
     duration?: SortOrderInput | SortOrder
+    code?: SortOrder
     testCase?: TestCaseOrderByWithRelationInput
     testSuiteRun?: TestSuiteRunOrderByWithRelationInput
     stepResults?: TestStepResultOrderByRelationAggregateInput
@@ -30549,6 +30565,7 @@ export namespace Prisma {
     startedAt?: DateTimeFilter<"TestCaseRun"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestCaseRun"> | Date | string | null
     duration?: IntNullableFilter<"TestCaseRun"> | number | null
+    code?: StringFilter<"TestCaseRun"> | string
     testCase?: XOR<TestCaseScalarRelationFilter, TestCaseWhereInput>
     testSuiteRun?: XOR<TestSuiteRunScalarRelationFilter, TestSuiteRunWhereInput>
     stepResults?: TestStepResultListRelationFilter
@@ -30562,6 +30579,7 @@ export namespace Prisma {
     startedAt?: SortOrder
     completedAt?: SortOrderInput | SortOrder
     duration?: SortOrderInput | SortOrder
+    code?: SortOrder
     _count?: TestCaseRunCountOrderByAggregateInput
     _avg?: TestCaseRunAvgOrderByAggregateInput
     _max?: TestCaseRunMaxOrderByAggregateInput
@@ -30580,6 +30598,7 @@ export namespace Prisma {
     startedAt?: DateTimeWithAggregatesFilter<"TestCaseRun"> | Date | string
     completedAt?: DateTimeNullableWithAggregatesFilter<"TestCaseRun"> | Date | string | null
     duration?: IntNullableWithAggregatesFilter<"TestCaseRun"> | number | null
+    code?: StringWithAggregatesFilter<"TestCaseRun"> | string
   }
 
   export type TestStepResultWhereInput = {
@@ -32239,6 +32258,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     testCase: TestCaseCreateNestedOneWithoutTestCaseRunsInput
     testSuiteRun: TestSuiteRunCreateNestedOneWithoutTestCaseRunsInput
     stepResults?: TestStepResultCreateNestedManyWithoutTestCaseRunInput
@@ -32252,6 +32272,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     stepResults?: TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInput
   }
 
@@ -32261,6 +32282,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     testCase?: TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInput
     testSuiteRun?: TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInput
     stepResults?: TestStepResultUpdateManyWithoutTestCaseRunNestedInput
@@ -32274,6 +32296,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     stepResults?: TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInput
   }
 
@@ -32285,6 +32308,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
   }
 
   export type TestCaseRunUpdateManyMutationInput = {
@@ -32293,6 +32317,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
   }
 
   export type TestCaseRunUncheckedUpdateManyInput = {
@@ -32303,6 +32328,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
   }
 
   export type TestStepResultCreateInput = {
@@ -33840,6 +33866,7 @@ export namespace Prisma {
     startedAt?: SortOrder
     completedAt?: SortOrder
     duration?: SortOrder
+    code?: SortOrder
   }
 
   export type TestCaseRunAvgOrderByAggregateInput = {
@@ -33854,6 +33881,7 @@ export namespace Prisma {
     startedAt?: SortOrder
     completedAt?: SortOrder
     duration?: SortOrder
+    code?: SortOrder
   }
 
   export type TestCaseRunMinOrderByAggregateInput = {
@@ -33864,6 +33892,7 @@ export namespace Prisma {
     startedAt?: SortOrder
     completedAt?: SortOrder
     duration?: SortOrder
+    code?: SortOrder
   }
 
   export type TestCaseRunSumOrderByAggregateInput = {
@@ -40056,6 +40085,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     testCase: TestCaseCreateNestedOneWithoutTestCaseRunsInput
     stepResults?: TestStepResultCreateNestedManyWithoutTestCaseRunInput
   }
@@ -40067,6 +40097,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     stepResults?: TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInput
   }
 
@@ -40142,6 +40173,7 @@ export namespace Prisma {
     startedAt?: DateTimeFilter<"TestCaseRun"> | Date | string
     completedAt?: DateTimeNullableFilter<"TestCaseRun"> | Date | string | null
     duration?: IntNullableFilter<"TestCaseRun"> | number | null
+    code?: StringFilter<"TestCaseRun"> | string
   }
 
   export type TestCaseCreateWithoutTestCaseRunsInput = {
@@ -40357,6 +40389,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     testCase: TestCaseCreateNestedOneWithoutTestCaseRunsInput
     testSuiteRun: TestSuiteRunCreateNestedOneWithoutTestCaseRunsInput
   }
@@ -40369,6 +40402,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
   }
 
   export type TestCaseRunCreateOrConnectWithoutStepResultsInput = {
@@ -40480,6 +40514,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     testCase?: TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInput
     testSuiteRun?: TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInput
   }
@@ -40492,6 +40527,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
   }
 
   export type TestStepResultUpsertWithoutChildStepsInput = {
@@ -41059,6 +41095,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     testSuiteRun: TestSuiteRunCreateNestedOneWithoutTestCaseRunsInput
     stepResults?: TestStepResultCreateNestedManyWithoutTestCaseRunInput
   }
@@ -41070,6 +41107,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
     stepResults?: TestStepResultUncheckedCreateNestedManyWithoutTestCaseRunInput
   }
 
@@ -42777,6 +42815,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
   }
 
   export type TestCaseRunUpdateWithoutTestSuiteRunInput = {
@@ -42785,6 +42824,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     testCase?: TestCaseUpdateOneRequiredWithoutTestCaseRunsNestedInput
     stepResults?: TestStepResultUpdateManyWithoutTestCaseRunNestedInput
   }
@@ -42796,6 +42836,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     stepResults?: TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInput
   }
 
@@ -42806,6 +42847,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
   }
 
   export type TestStepResultCreateManyTestCaseRunInput = {
@@ -42991,6 +43033,7 @@ export namespace Prisma {
     startedAt?: Date | string
     completedAt?: Date | string | null
     duration?: number | null
+    code: string
   }
 
   export type TestCaseCommentCreateManyTestCaseInput = {
@@ -43007,6 +43050,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     testSuiteRun?: TestSuiteRunUpdateOneRequiredWithoutTestCaseRunsNestedInput
     stepResults?: TestStepResultUpdateManyWithoutTestCaseRunNestedInput
   }
@@ -43018,6 +43062,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
     stepResults?: TestStepResultUncheckedUpdateManyWithoutTestCaseRunNestedInput
   }
 
@@ -43028,6 +43073,7 @@ export namespace Prisma {
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     duration?: NullableIntFieldUpdateOperationsInput | number | null
+    code?: StringFieldUpdateOperationsInput | string
   }
 
   export type TestCaseCommentUpdateWithoutTestCaseInput = {

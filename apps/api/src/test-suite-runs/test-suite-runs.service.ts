@@ -118,6 +118,7 @@ export class TestSuiteRunsService {
               testCaseId: testCase.id,
               testSuiteRunId: testSuiteRun.id,
               status: TestCaseRunStatus.PENDING,
+              code: testCase.code,
             },
             include: {
               testCase: true,
@@ -302,7 +303,7 @@ export class TestSuiteRunsService {
             testCaseId: testCaseRun.testCaseId,
             testSuiteRunId,
             testSuiteId: testCaseRun?.testSuiteId!,
-            code: testCaseRun.testCase.code,
+            code: testCaseRun.code,
             projectVariablesHash: Object.fromEntries(projectVariablesHash),
             testSuiteVariablesHash: Object.fromEntries(testSuiteVariablesHash),
             projectFunctionsHash: Object.fromEntries(projectFunctionsHash),
@@ -538,7 +539,8 @@ export class TestSuiteRunsService {
         startedAt: new Date(),
         completedAt: null,
         duration: null,
-      },
+        code: testCaseRun.code, // Ensure we have the latest code
+      } as any,
     });
 
     // Create new job data for retry
@@ -549,7 +551,7 @@ export class TestSuiteRunsService {
       testSuiteRunId: testCaseRun.testSuiteRunId,
       testSuiteId: testCaseRun.testSuiteRun.testSuiteId,
       retryAttempt: 0,
-      code: testCaseRun.testCase.code,
+      code: testCaseRun.code, // Pass code to worker for execution
     };
 
     // Add job to execution queue
