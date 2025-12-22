@@ -20,7 +20,6 @@
     "dotenv": "^16.6.1",
     "express": "^4.18.2",
     "ioredis": "^5.7.0",
-    "minio": "^8.0.5",
     "playwright": "^1.40.0",
     "redis": "^5.8.2"
   },

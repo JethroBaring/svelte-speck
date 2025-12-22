@@ -1,4 +1,4 @@
-import { getMinioPublicUrl } from "$lib/api/minio";
+import { getFilePublicUrl } from "$lib/api/files";
 import type { TestCase, TestCaseRun, TestStepResult, TestStepStatusType } from '@repo/types/zod';
 import { getContext, setContext } from 'svelte';
 
@@ -67,7 +67,7 @@ export class TestCasesStore {
 		console.log("completeTestStep", testStep);
 		// Extract only the filename from the screenshotUrl (strip any URL prefix/path)
 		const screenshotFilename = testStep.screenshotUrl?.split('/').pop();
-		const screenshotUrl = screenshotFilename ? await getMinioPublicUrl(screenshotFilename) : { data: undefined };
+		const screenshotUrl = screenshotFilename ? await getFilePublicUrl(screenshotFilename) : { data: undefined };
 		this.testCaseRuns = this.testCaseRuns.map((testCaseRun) =>
 			testCaseRun.id === testCaseRunId
 				? {

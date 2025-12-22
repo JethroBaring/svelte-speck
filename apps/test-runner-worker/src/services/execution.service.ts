@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import websocketService from './websocket.service';
-import minioService from './minio.service';
+import fileStorageService from './file-storage.service';
 import { Scanner, Parser, Interpreter, Environment } from '@repo/interpreter';
 
 enum TestStepStatus {
@@ -710,7 +710,7 @@ class ExecutionService {
     const filename = `test-case-${testCaseRunId}-step-${stepNumber}-${timestamp}.png`;
 
     // Upload directly to MinIO
-    const uploadResult = await minioService.uploadScreenshot(screenshot, filename);
+    const uploadResult = await fileStorageService.uploadScreenshot(screenshot, filename);
 
     return uploadResult.url;
   }
@@ -726,7 +726,7 @@ class ExecutionService {
         const filename = `test-case-${testCaseRunId}-error-${timestamp}.png`;
 
         // Upload directly to MinIO
-        const uploadResult = await minioService.uploadScreenshot(screenshot, filename);
+        const uploadResult = await fileStorageService.uploadScreenshot(screenshot, filename);
         return uploadResult.url;
       }
     } catch (error) {

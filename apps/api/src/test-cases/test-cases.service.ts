@@ -5,7 +5,6 @@ import {
   TestStepStatus,
   TestSuiteRunStatus,
 } from '@repo/types/prisma';
-import { MinioService } from 'src/common/minio/minio.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TestSuiteRunsEventsService } from 'src/test-suite-runs/test-suite-runs-events.service';
 

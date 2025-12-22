@@ -19,7 +19,7 @@ import { WorkspaceModule } from './workspaces/workspace.module';
 import { WorkspaceMembersModule } from './workspace-members/workspace-members.module';
 import { MailModule } from './mail/mail.module';
 import { WorkspaceInvitationsModule } from './workspace-invitations/workspace-invitations.module';
-import { MinioModule } from "./common/minio/minio.module";
+import { FilesModule } from "./common/files/files.module";
 import { RedisModule } from "./common/redis";
 import { WebSocketModule } from "./common/websocket";
 import { TestSuiteRunsModule } from './test-suite-runs/test-suite-runs.module';
@@ -55,7 +55,7 @@ import { WorkerModule } from './worker/worker.module';
     WorkspaceMembersModule,
     MailModule,
     WorkspaceInvitationsModule,
-    MinioModule,
+    FilesModule,
     TestSuiteRunsModule,
     WorkerModule,
   ],
